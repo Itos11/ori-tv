@@ -72,7 +72,6 @@
         }
 
         document.body.appendChild(box);
-
         draw();
     }
 
@@ -139,14 +138,16 @@
         }
     }
 
+    // =========================
+    // ИСТОРИЯ — НЕ ТРОГАЕМ
+    // =========================
+
     function openHistory() {
 
         try {
 
-            // Сначала закрываем нашу шторку
             closeNav();
 
-            // Обновляем данные истории Lampa 3.x
             if (
                 Lampa.Favorite &&
                 Lampa.Favorite.read
@@ -154,8 +155,6 @@
                 Lampa.Favorite.read();
             }
 
-            // Небольшая пауза, чтобы Lampa
-            // успела обновить состояние Favorite
             setTimeout(function () {
 
                 try {
@@ -203,18 +202,58 @@
         }
     }
 
+    // =========================
+    // ФИЛЬМЫ
+    // =========================
+
+    function openMovies() {
+
+        closeNav();
+
+        try {
+
+            Lampa.Router.call(
+                'main',
+                {
+                    title: 'Фильмы',
+                    type: 'movie',
+                    page: 1,
+                    source: 'tmdb'
+                }
+            );
+
+        } catch (e) {
+
+            notify(
+                'ФИЛЬМЫ: ' +
+                e.message
+            );
+        }
+    }
+
+    // =========================
+    // OK
+    // =========================
+
     function ok() {
+
         if (!visible) return;
 
-        if (items[selected] === 'ИСТОРИЯ') {
-            openHistory();
-            return;
-        }
+        if (selected === 1) {
 
-        notify(
-            'ВЫБРАНО: ' +
-            items[selected]
-        );
+            openHistory();
+
+        } else if (selected === 2) {
+
+            openMovies();
+
+        } else {
+
+            notify(
+                'ВЫБРАНО: ' +
+                items[selected]
+            );
+        }
     }
 
     function controllerName() {
@@ -248,7 +287,8 @@
 
     function checkHead() {
 
-        var name = controllerName();
+        var name =
+            controllerName();
 
         if (name === 'head') {
 
@@ -343,7 +383,7 @@
     );
 
     notify(
-        'PRISMA NAV HISTORY ГОТОВ'
+        'PRISMA NAV ФИЛЬМЫ ГОТОВ'
     );
 
 })();
