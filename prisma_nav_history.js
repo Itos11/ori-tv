@@ -31,6 +31,7 @@
         if (box) return;
 
         box = document.createElement('div');
+
         box.id = 'prisma-nav-history';
 
         box.style.position = 'fixed';
@@ -38,57 +39,98 @@
         box.style.left = '0';
         box.style.right = '0';
         box.style.height = '100px';
+
         box.style.zIndex = '999999';
+
         box.style.display = 'none';
         box.style.alignItems = 'center';
         box.style.justifyContent = 'center';
+
         box.style.padding = '0 25px';
         box.style.boxSizing = 'border-box';
-        box.style.background = 'rgba(10,10,10,0.97)';
-        box.style.boxShadow = '0 8px 30px rgba(0,0,0,0.5)';
+
+        box.style.background =
+            'rgba(10,10,10,0.97)';
+
+        box.style.boxShadow =
+            '0 8px 30px rgba(0,0,0,0.5)';
+
         box.style.pointerEvents = 'none';
 
-        for (var i = 0; i < items.length; i++) {
-            var button = document.createElement('div');
+        for (
+            var i = 0;
+            i < items.length;
+            i++
+        ) {
 
-            button.innerHTML = items[i];
+            var button =
+                document.createElement('div');
 
-            button.style.color = '#ffffff';
-            button.style.fontSize = '21px';
-            button.style.fontWeight = '600';
-            button.style.padding = '15px 24px';
-            button.style.margin = '0 3px';
-            button.style.borderRadius = '9px';
-            button.style.opacity = '0.7';
-            button.style.transform = 'scale(1)';
+            button.innerHTML =
+                items[i];
+
+            button.style.color =
+                '#ffffff';
+
+            button.style.fontSize =
+                '21px';
+
+            button.style.fontWeight =
+                '600';
+
+            button.style.padding =
+                '15px 24px';
+
+            button.style.margin =
+                '0 3px';
+
+            button.style.borderRadius =
+                '9px';
+
+            button.style.opacity =
+                '0.7';
+
+            button.style.transform =
+                'scale(1)';
+
             button.style.transition =
                 'transform .18s ease, ' +
                 'background .18s ease, ' +
                 'opacity .18s ease';
-            button.style.whiteSpace = 'nowrap';
+
+            button.style.whiteSpace =
+                'nowrap';
 
             box.appendChild(button);
+
             buttons.push(button);
         }
 
         document.body.appendChild(box);
+
         draw();
     }
 
     function draw() {
+
         if (!box) return;
 
         box.style.display =
             visible ? 'flex' : 'none';
 
-        for (var i = 0; i < buttons.length; i++) {
+        for (
+            var i = 0;
+            i < buttons.length;
+            i++
+        ) {
 
             if (i === selected) {
 
                 buttons[i].style.background =
                     'rgba(255,255,255,0.20)';
 
-                buttons[i].style.opacity = '1';
+                buttons[i].style.opacity =
+                    '1';
 
                 buttons[i].style.transform =
                     'scale(1.08)';
@@ -98,7 +140,8 @@
                 buttons[i].style.background =
                     'transparent';
 
-                buttons[i].style.opacity = '0.7';
+                buttons[i].style.opacity =
+                    '0.7';
 
                 buttons[i].style.transform =
                     'scale(1)';
@@ -107,40 +150,54 @@
     }
 
     function openNav() {
+
         if (visible) return;
 
         visible = true;
+
         draw();
     }
 
     function closeNav() {
+
         if (!visible) return;
 
         visible = false;
+
         draw();
     }
 
     function left() {
+
         if (!visible) return;
 
         if (selected > 0) {
+
             selected--;
+
             draw();
         }
     }
 
     function right() {
+
         if (!visible) return;
 
-        if (selected < items.length - 1) {
+        if (
+            selected <
+            items.length - 1
+        ) {
+
             selected++;
+
             draw();
         }
     }
 
-    // =========================
-    // ИСТОРИЯ — НЕ ТРОГАЕМ
-    // =========================
+    /*
+     * ТОЛЬКО ИСТОРИЯ
+     * Этот переход у нас уже работает.
+     */
 
     function openHistory() {
 
@@ -152,46 +209,57 @@
                 Lampa.Favorite &&
                 Lampa.Favorite.read
             ) {
+
                 Lampa.Favorite.read();
             }
 
-            setTimeout(function () {
+            setTimeout(
+                function () {
 
-                try {
+                    try {
 
-                    if (
-                        Lampa.Router &&
-                        Lampa.Router.call
-                    ) {
+                        if (
+                            Lampa.Router &&
+                            Lampa.Router.call
+                        ) {
 
-                        Lampa.Router.call(
-                            'favorite',
-                            {
-                                url: '',
-                                title: 'История просмотров',
-                                component: 'favorite',
-                                type: 'history',
-                                page: 1,
-                                filter: ''
-                            }
-                        );
+                            Lampa.Router.call(
+                                'favorite',
+                                {
+                                    url: '',
+                                    title:
+                                        'История просмотров',
 
-                    } else {
+                                    component:
+                                        'favorite',
+
+                                    type:
+                                        'history',
+
+                                    page: 1,
+
+                                    filter: ''
+                                }
+                            );
+
+                        } else {
+
+                            notify(
+                                'Router.call НЕ НАЙДЕН'
+                            );
+                        }
+
+                    } catch (e) {
 
                         notify(
-                            'Router.call НЕ НАЙДЕН'
+                            'ИСТОРИЯ: ' +
+                            e.message
                         );
                     }
 
-                } catch (e) {
-
-                    notify(
-                        'ИСТОРИЯ: ' +
-                        e.message
-                    );
-                }
-
-            }, 300);
+                },
+                300
+            );
 
         } catch (e) {
 
@@ -202,59 +270,39 @@
         }
     }
 
-    // =========================
-    // ФИЛЬМЫ
-    // =========================
-
-    function openMovies() {
-
-        closeNav();
-
-        try {
-
-            Lampa.Router.call(
-                'main',
-                {
-                    title: 'Фильмы',
-                    type: 'movie',
-                    page: 1,
-                    source: 'tmdb'
-                }
-            );
-
-        } catch (e) {
-
-            notify(
-                'ФИЛЬМЫ: ' +
-                e.message
-            );
-        }
-    }
-
-    // =========================
-    // OK
-    // =========================
+    /*
+     * OK
+     */
 
     function ok() {
 
         if (!visible) return;
 
+        /*
+         * ИСТОРИЯ
+         */
         if (selected === 1) {
 
             openHistory();
 
-        } else if (selected === 2) {
-
-            openMovies();
-
-        } else {
-
-            notify(
-                'ВЫБРАНО: ' +
-                items[selected]
-            );
+            return;
         }
+
+        /*
+         * Остальные пока
+         * только показывают выбор.
+         */
+
+        notify(
+            'ВЫБРАНО: ' +
+            items[selected]
+        );
     }
+
+    /*
+     * Узнаём,
+     * находится ли Lampa наверху.
+     */
 
     function controllerName() {
 
@@ -264,6 +312,7 @@
                 !Lampa.Controller ||
                 !Lampa.Controller.enabled
             ) {
+
                 return '';
             }
 
@@ -273,10 +322,12 @@
             if (!controller) return '';
 
             if (controller.name) {
+
                 return controller.name;
             }
 
             if (controller._name) {
+
                 return controller._name;
             }
 
@@ -284,6 +335,10 @@
 
         return '';
     }
+
+    /*
+     * Открытие шторки
+     */
 
     function checkHead() {
 
@@ -297,22 +352,32 @@
         } else {
 
             if (visible) {
+
                 closeNav();
             }
         }
     }
+
+    /*
+     * Управление пультом
+     */
 
     document.addEventListener(
         'keydown',
         function (event) {
 
             if (!visible) {
+
                 return;
             }
 
-            var code = event.keyCode;
+            var code =
+                event.keyCode;
 
-            // LEFT
+            /*
+             * LEFT
+             */
+
             if (code === 37) {
 
                 left();
@@ -323,7 +388,10 @@
                 return;
             }
 
-            // RIGHT
+            /*
+             * RIGHT
+             */
+
             if (code === 39) {
 
                 right();
@@ -334,7 +402,10 @@
                 return;
             }
 
-            // OK
+            /*
+             * OK
+             */
+
             if (code === 13) {
 
                 ok();
@@ -345,15 +416,20 @@
                 return;
             }
 
-            // DOWN
+            /*
+             * DOWN
+             */
+
             if (code === 40) {
 
                 closeNav();
 
                 try {
+
                     Lampa.Controller.toggle(
                         'content'
                     );
+
                 } catch (e) {}
 
                 event.preventDefault();
@@ -362,7 +438,10 @@
                 return;
             }
 
-            // UP
+            /*
+             * UP
+             */
+
             if (code === 38) {
 
                 event.preventDefault();
@@ -375,6 +454,10 @@
         true
     );
 
+    /*
+     * Запуск
+     */
+
     create();
 
     setInterval(
@@ -383,7 +466,7 @@
     );
 
     notify(
-        'PRISMA NAV ФИЛЬМЫ ГОТОВ'
+        'PRISMA NAV ГОТОВ'
     );
 
 })();
