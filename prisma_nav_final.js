@@ -26,11 +26,9 @@
     }
 
     function create() {
-
         if (box) return;
 
         box = document.createElement('div');
-
         box.id = 'prisma-nav-final';
 
         box.style.position = 'fixed';
@@ -38,72 +36,46 @@
         box.style.left = '0';
         box.style.right = '0';
         box.style.height = '100px';
-
         box.style.zIndex = '999999';
-
         box.style.display = 'none';
         box.style.alignItems = 'center';
         box.style.justifyContent = 'center';
-
         box.style.padding = '0 25px';
         box.style.boxSizing = 'border-box';
-
-        box.style.background =
-            'rgba(10,10,10,0.97)';
-
-        box.style.boxShadow =
-            '0 8px 30px rgba(0,0,0,0.5)';
-
+        box.style.background = 'rgba(10,10,10,0.97)';
+        box.style.boxShadow = '0 8px 30px rgba(0,0,0,0.5)';
         box.style.pointerEvents = 'none';
 
         for (var i = 0; i < items.length; i++) {
-
             var button = document.createElement('div');
 
             button.innerHTML = items[i];
-
             button.style.color = '#ffffff';
             button.style.fontSize = '21px';
             button.style.fontWeight = '600';
-
-            button.style.padding =
-                '15px 24px';
-
-            button.style.margin =
-                '0 3px';
-
-            button.style.borderRadius =
-                '9px';
-
+            button.style.padding = '15px 24px';
+            button.style.margin = '0 3px';
+            button.style.borderRadius = '9px';
             button.style.opacity = '0.7';
-
-            button.style.transform =
-                'scale(1)';
-
+            button.style.transform = 'scale(1)';
             button.style.transition =
                 'transform .18s ease, ' +
                 'background .18s ease, ' +
                 'opacity .18s ease';
-
-            button.style.whiteSpace =
-                'nowrap';
+            button.style.whiteSpace = 'nowrap';
 
             box.appendChild(button);
-
             buttons.push(button);
         }
 
         document.body.appendChild(box);
-
         draw();
     }
 
     function draw() {
-
         if (!box) return;
 
-        box.style.display =
-            visible ? 'flex' : 'none';
+        box.style.display = visible ? 'flex' : 'none';
 
         for (var i = 0; i < buttons.length; i++) {
 
@@ -112,8 +84,7 @@
                 buttons[i].style.background =
                     'rgba(255,255,255,0.20)';
 
-                buttons[i].style.opacity =
-                    '1';
+                buttons[i].style.opacity = '1';
 
                 buttons[i].style.transform =
                     'scale(1.08)';
@@ -133,61 +104,93 @@
     }
 
     function openNav() {
-
         if (visible) return;
 
         visible = true;
-
         draw();
     }
 
     function closeNav() {
-
         if (!visible) return;
 
         visible = false;
-
         draw();
     }
 
     function left() {
-
         if (!visible) return;
 
         if (selected > 0) {
-
             selected--;
-
             draw();
         }
     }
 
     function right() {
-
         if (!visible) return;
 
         if (selected < items.length - 1) {
-
             selected++;
-
             draw();
         }
     }
 
-    function ok() {
+    function openHistory() {
 
-        if (!visible) return;
-
-        notify(
-            'ВЫБРАНО: ' +
-            items[selected]
-        );
+        /*
+         * ТОЧНЫЙ РАБОЧИЙ URL,
+         * полученный из твоей Lampa 3.3.3
+         */
+        window.location.href =
+            'http://lampa.mx/?title=' +
+            encodeURIComponent('История просмотров') +
+            '&type=history' +
+            '&component=favorite' +
+            '&source=tmdb' +
+            '&page=1';
     }
 
-    /*
-     * Проверяем, какой контроллер сейчас
-     * активен у Lampa.
-     */
+    function ok() {
+        if (!visible) return;
+
+        if (selected === 0) {
+
+            notify('ГЛАВНОЕ');
+
+            closeNav();
+
+            try {
+                Lampa.Controller.toggle('content');
+            } catch (e) {}
+
+            return;
+        }
+
+        if (selected === 1) {
+
+            openHistory();
+            return;
+        }
+
+        if (selected === 2) {
+
+            notify('ФИЛЬМЫ — СЛЕДУЮЩИЙ ЭТАП');
+            return;
+        }
+
+        if (selected === 3) {
+
+            notify('СЕРИАЛЫ — СЛЕДУЮЩИЙ ЭТАП');
+            return;
+        }
+
+        if (selected === 4) {
+
+            notify('МУЛЬТФИЛЬМЫ — СЛЕДУЮЩИЙ ЭТАП');
+            return;
+        }
+    }
+
     function controllerName() {
 
         try {
@@ -215,20 +218,6 @@
         return '';
     }
 
-    /*
-     * Следим за переключением Lampa
-     * в штатный HEAD.
-     *
-     * ВАЖНО:
-     * мы НЕ перехватываем ↑.
-     *
-     * Lampa сама получает ↑,
-     * сама понимает, что выше двигаться нельзя,
-     * и переключает Controller на head.
-     *
-     * Только после этого мы показываем
-     * свою шторку.
-     */
     function checkHead() {
 
         var name = controllerName();
@@ -239,36 +228,27 @@
 
         } else {
 
-            /*
-             * Если Lampa ушла из head,
-             * прячем нашу шторку.
-             */
             if (visible) {
                 closeNav();
             }
         }
     }
 
-    /*
-     * Управляем клавишами ТОЛЬКО когда
-     * Lampa уже находится в HEAD.
-     *
-     * Поэтому обычный ↑ внутри контента
-     * вообще не трогаем.
-     */
     document.addEventListener(
         'keydown',
         function (event) {
 
+            /*
+             * Пока шторка закрыта,
+             * вообще не вмешиваемся в Lampa.
+             */
             if (!visible) {
                 return;
             }
 
             var code = event.keyCode;
 
-            /*
-             * LEFT
-             */
+            // LEFT
             if (code === 37) {
 
                 left();
@@ -279,9 +259,7 @@
                 return;
             }
 
-            /*
-             * RIGHT
-             */
+            // RIGHT
             if (code === 39) {
 
                 right();
@@ -292,9 +270,7 @@
                 return;
             }
 
-            /*
-             * OK
-             */
+            // OK / ENTER
             if (code === 13) {
 
                 ok();
@@ -305,24 +281,13 @@
                 return;
             }
 
-            /*
-             * DOWN
-             *
-             * Закрываем нашу шторку.
-             *
-             * Lampa также возвращаем
-             * в content.
-             */
+            // DOWN
             if (code === 40) {
 
                 closeNav();
 
                 try {
-
-                    Lampa.Controller.toggle(
-                        'content'
-                    );
-
+                    Lampa.Controller.toggle('content');
                 } catch (e) {}
 
                 event.preventDefault();
@@ -331,10 +296,7 @@
                 return;
             }
 
-            /*
-             * UP внутри шторки
-             * ничего не меняет.
-             */
+            // UP
             if (code === 38) {
 
                 event.preventDefault();
@@ -347,22 +309,13 @@
         true
     );
 
-    /*
-     * Создаём интерфейс.
-     */
     create();
 
-    /*
-     * Проверяем Controller примерно
-     * 10 раз в секунду.
-     */
     setInterval(
         checkHead,
         100
     );
 
-    notify(
-        'PRISMA NAV FINAL ГОТОВ'
-    );
+    notify('PRISMA NAV С ИСТОРИЕЙ ГОТОВ');
 
 })();
