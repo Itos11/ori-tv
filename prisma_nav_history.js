@@ -31,6 +31,7 @@
         if (box) return;
 
         box = document.createElement('div');
+
         box.id = 'prisma-nav-history';
 
         box.style.position = 'fixed';
@@ -38,14 +39,22 @@
         box.style.left = '0';
         box.style.right = '0';
         box.style.height = '100px';
+
         box.style.zIndex = '999999';
+
         box.style.display = 'none';
         box.style.alignItems = 'center';
         box.style.justifyContent = 'center';
+
         box.style.padding = '0 25px';
         box.style.boxSizing = 'border-box';
-        box.style.background = 'rgba(10,10,10,0.97)';
-        box.style.boxShadow = '0 8px 30px rgba(0,0,0,0.5)';
+
+        box.style.background =
+            'rgba(10,10,10,0.97)';
+
+        box.style.boxShadow =
+            '0 8px 30px rgba(0,0,0,0.5)';
+
         box.style.pointerEvents = 'none';
 
         for (var i = 0; i < items.length; i++) {
@@ -89,6 +98,7 @@
                 'nowrap';
 
             box.appendChild(button);
+
             buttons.push(button);
         }
 
@@ -184,15 +194,13 @@
      * =========================
      * ИСТОРИЯ
      * =========================
-     *
-     * ЭТОТ КОД НЕ МЕНЯЕМ.
      */
 
     function openHistory() {
 
-        try {
+        closeNav();
 
-            closeNav();
+        try {
 
             if (
                 Lampa.Favorite &&
@@ -245,34 +253,6 @@
 
     /*
      * =========================
-     * ФИЛЬМЫ
-     * =========================
-     */
-
-    function openMovies() {
-
-        closeNav();
-
-        try {
-
-            Lampa.Router.call(
-                'category',
-                {
-                    url: 'movie'
-                }
-            );
-
-        } catch (e) {
-
-            notify(
-                'ФИЛЬМЫ: ' +
-                e.message
-            );
-        }
-    }
-
-    /*
-     * =========================
      * OK
      * =========================
      */
@@ -281,32 +261,12 @@
 
         if (!visible) return;
 
-        /*
-         * ИСТОРИЯ
-         */
-
         if (selected === 1) {
 
             openHistory();
 
             return;
         }
-
-        /*
-         * ФИЛЬМЫ
-         */
-
-        if (selected === 2) {
-
-            openMovies();
-
-            return;
-        }
-
-        /*
-         * Остальные пока
-         * не трогаем.
-         */
 
         notify(
             'ВЫБРАНО: ' +
@@ -352,12 +312,6 @@
         return '';
     }
 
-    /*
-     * =========================
-     * ОТКРЫТИЕ ШТОРКИ
-     * =========================
-     */
-
     function checkHead() {
 
         var name =
@@ -391,10 +345,6 @@
             var code =
                 event.keyCode;
 
-            /*
-             * LEFT
-             */
-
             if (code === 37) {
 
                 left();
@@ -404,10 +354,6 @@
 
                 return;
             }
-
-            /*
-             * RIGHT
-             */
 
             if (code === 39) {
 
@@ -419,10 +365,6 @@
                 return;
             }
 
-            /*
-             * OK
-             */
-
             if (code === 13) {
 
                 ok();
@@ -432,10 +374,6 @@
 
                 return;
             }
-
-            /*
-             * DOWN
-             */
 
             if (code === 40) {
 
@@ -454,10 +392,6 @@
 
                 return;
             }
-
-            /*
-             * UP
-             */
 
             if (code === 38) {
 
@@ -485,7 +419,7 @@
     );
 
     notify(
-        'PRISMA NAV MOVIES ГОТОВ'
+        'PRISMA NAV ГОТОВ'
     );
 
 })();
