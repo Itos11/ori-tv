@@ -9,68 +9,26 @@
         }
     }
 
-    setTimeout(function () {
+    notify('ОТКРЫВАЮ ИСТОРИЮ...');
 
+    setTimeout(function () {
         try {
 
-            // Перечитать сохранённые данные
-            if (Lampa.Favorite &&
-                Lampa.Favorite.read) {
-
-                Lampa.Favorite.read(true);
-            }
-
-            // Принудительно создать отсутствующие категории
-            if (Lampa.Favorite &&
-                Lampa.Favorite.full) {
-
-                var all = Lampa.Favorite.full();
-
-                var info =
-                    'history=' +
-                    (all.history ?
-                        all.history.length : 'UNDEFINED') +
-                    ' | like=' +
-                    (all.like ?
-                        all.like.length : 'UNDEFINED');
-
-                notify('FAVORITE ГОТОВ: ' + info);
-
-            } else {
-
-                notify('Favorite.full НЕ НАЙДЕН');
-                return;
-            }
-
-            // Теперь открываем
-            setTimeout(function () {
-
-                try {
-
-                    Lampa.Activity.push({
-                        component: 'favorite',
-                        type: 'history',
-                        page: 1,
-                        title: 'История',
-                        filter: ''
-                    });
-
-                } catch (e) {
-
-                    notify(
-                        'ОШИБКА: ' + e.message
-                    );
-                }
-
-            }, 500);
+            Lampa.Activity.push({
+                title: 'История просмотров',
+                type: 'history',
+                component: 'favorite',
+                source: 'tmdb',
+                page: 1
+            });
 
         } catch (e) {
 
             notify(
-                'ОШИБКА INIT: ' + e.message
+                'ОШИБКА: ' + e.message
             );
-        }
 
-    }, 1500);
+        }
+    }, 500);
 
 })();
