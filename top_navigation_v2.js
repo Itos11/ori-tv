@@ -2,9 +2,9 @@
     'use strict';
 
     if (!window.Lampa) return;
-    if (window.LampaTopNavigationV2) return;
+    if (window.LampaTopNavigationV3) return;
 
-    window.LampaTopNavigationV2 = true;
+    window.LampaTopNavigationV3 = true;
 
     var items = [
         'ГЛАВНОЕ',
@@ -15,59 +15,53 @@
     ];
 
     var current = 0;
-    var opened = true;
     var nav = null;
 
-    function createStyle() {
+    function style() {
 
-        if ($('#ltn2-style').length) return;
+        if ($('#ltn3-style').length) return;
 
         $('head').append(
-            '<style id="ltn2-style">' +
+            '<style id="ltn3-style">' +
 
-            '.ltn2{' +
+            '.ltn3 {' +
                 'position:fixed;' +
                 'top:0;' +
                 'left:0;' +
                 'right:0;' +
-                'height:70px;' +
+                'height:72px;' +
                 'z-index:999999;' +
                 'display:flex;' +
                 'align-items:center;' +
                 'justify-content:center;' +
-                'background:rgba(12,12,12,.93);' +
-                'backdrop-filter:blur(10px);' +
+                'gap:5px;' +
                 'padding:0 20px;' +
                 'box-sizing:border-box;' +
+                'background:rgba(12,12,12,.96);' +
             '}' +
 
-            '.ltn2.hidden{' +
-                'transform:translateY(-100%);' +
-            '}' +
-
-            '.ltn2-item{' +
+            '.ltn3-item {' +
                 'position:relative;' +
                 'height:46px;' +
                 'padding:0 22px;' +
-                'margin:0 3px;' +
                 'display:flex;' +
                 'align-items:center;' +
                 'justify-content:center;' +
                 'border-radius:8px;' +
-                'color:rgba(255,255,255,.62);' +
+                'color:rgba(255,255,255,.65);' +
                 'font-size:17px;' +
                 'font-weight:600;' +
                 'box-sizing:border-box;' +
                 'white-space:nowrap;' +
             '}' +
 
-            '.ltn2-item.focus{' +
+            '.ltn3-item.focus {' +
                 'color:#fff;' +
                 'background:rgba(255,255,255,.18);' +
                 'transform:scale(1.04);' +
             '}' +
 
-            '.ltn2-item.focus:after{' +
+            '.ltn3-item.focus:after {' +
                 'content:"";' +
                 'position:absolute;' +
                 'left:22px;' +
@@ -82,26 +76,41 @@
         );
     }
 
+    function render() {
+
+        if (!nav) return;
+
+        nav.find('.ltn3-item').each(function (index) {
+
+            if (index === current) {
+                $(this).addClass('focus');
+            } else {
+                $(this).removeClass('focus');
+            }
+
+        });
+    }
+
     function create() {
 
         var i;
-        var item;
+        var button;
 
         if (nav) return;
 
-        nav = $('<div class="ltn2"></div>');
+        nav = $('<div class="ltn3"></div>');
 
         for (i = 0; i < items.length; i++) {
 
-            item = $(
-                '<div class="ltn2-item selector">' +
+            button = $(
+                '<div class="ltn3-item selector">' +
                 items[i] +
                 '</div>'
             );
 
             (function (index) {
 
-                item.on('hover:focus', function () {
+                button.on('hover:focus', function () {
 
                     current = index;
 
@@ -109,7 +118,7 @@
 
                 });
 
-                item.on('hover:enter', function () {
+                button.on('hover:enter', function () {
 
                     current = index;
 
@@ -119,7 +128,7 @@
 
                 });
 
-                item.on('click', function () {
+                button.on('click', function () {
 
                     current = index;
 
@@ -131,7 +140,7 @@
 
             })(i);
 
-            nav.append(item);
+            nav.append(button);
         }
 
         $('body').append(nav);
@@ -139,131 +148,88 @@
         render();
     }
 
-    function render() {
+    function focusCurrent() {
 
         if (!nav) return;
 
-        nav.find('.ltn2-item').each(function (index) {
+        var button = nav
+            .find('.ltn3-item')
+            .eq(current);
+
+        if (!button.length) return;
+
+        render();
+
+        try {
 
             if (
-                opened &&
-                index === current
+                window.Navigator &&
+                Navigator.focused
             ) {
 
-                $(this).addClass('focus');
+                Navigator.focused(
+                    button[0]
+                );
 
             } else {
 
-                $(this).removeClass('focus');
+                Lampa.Controller.collectionFocus(
+                    button[0],
+                    nav
+                );
 
             }
 
-        });
-    }
+        } catch (e) {
 
-    function show() {
+            render();
 
-        create();
-
-        nav.removeClass('hidden');
-
-        opened = true;
-
-        render();
-
-    }
-
-    function hide() {
-
-        if (!nav) return;
-
-        nav.addClass('hidden');
-
-        opened = false;
-
-        render();
-
+        }
     }
 
     function select() {
 
-        var title = items[current];
-
-        /*
-         * Пока тестируем навигацию.
-         * После проверки подключим реальные разделы Lampa.
-         */
-
         if (Lampa.Noty) {
 
             Lampa.Noty.show(
-                'Выбрано: ' + title
+                'Выбрано: ' + items[current]
             );
 
         }
 
         console.log(
-            '[TopNavigation] ' +
-            title
+            '[Top Navigation] ' +
+            items[current]
         );
-
     }
 
-    function keyboard() {
+    function controller() {
 
-        document.addEventListener(
-            'keydown',
-            function (event) {
+        Lampa.Controller.add(
+            'top_navigation',
+            {
 
-                var code = event.keyCode;
+                toggle: function () {
 
-                /*
-                 * Если шторка закрыта,
-                 * UP её открывает.
-                 */
+                    create();
 
-                if (!opened) {
+                    focusCurrent();
 
-                    if (code === 38) {
+                },
 
-                        event.preventDefault();
-
-                        show();
-
-                    }
-
-                    return;
-                }
-
-                /*
-                 * LEFT
-                 */
-
-                if (code === 37) {
-
-                    event.preventDefault();
+                left: function () {
 
                     current--;
 
                     if (current < 0) {
-
-                        current =
-                            items.length - 1;
-
+                        current = items.length - 1;
                     }
 
-                    render();
+                    focusCurrent();
 
-                    return;
-                }
+                },
 
-                /*
-                 * RIGHT
-                 */
-
-                if (code === 39) {
-
-                    event.preventDefault();
+                right: function () {
 
                     current++;
 
@@ -276,74 +242,77 @@
 
                     }
 
-                    render();
+                    focusCurrent();
 
-                    return;
-                }
+                },
 
-                /*
-                 * OK
-                 */
+                up: function () {
 
-                if (
-                    code === 13 ||
-                    code === 23
-                ) {
+                    current--;
 
-                    event.preventDefault();
+                    if (current < 0) {
+                        current = items.length - 1;
+                    }
+
+                    focusCurrent();
+
+                },
+
+                down: function () {
+
+                    try {
+
+                        Lampa.Controller.toggle(
+                            'content'
+                        );
+
+                    } catch (e) {}
+
+                },
+
+                ok: function () {
 
                     select();
 
-                    return;
-                }
+                },
 
-                /*
-                 * DOWN
-                 */
+                back: function () {
 
-                if (code === 40) {
+                    try {
 
-                    event.preventDefault();
+                        Lampa.Controller.toggle(
+                            'content'
+                        );
 
-                    hide();
-
-                    return;
-                }
-
-                /*
-                 * BACK
-                 */
-
-                if (
-                    code === 27 ||
-                    code === 4 ||
-                    code === 461
-                ) {
-
-                    event.preventDefault();
-
-                    hide();
+                    } catch (e) {}
 
                 }
 
-            },
-            true
+            }
         );
 
     }
 
     function start() {
 
-        createStyle();
+        style();
 
         create();
 
-        keyboard();
+        controller();
+
+        setTimeout(function () {
+
+            Lampa.Controller.toggle(
+                'top_navigation'
+            );
+
+        }, 500);
 
         if (Lampa.Noty) {
 
             Lampa.Noty.show(
-                'Навигация готова'
+                'Навигация подключена'
             );
 
         }
@@ -364,8 +333,7 @@
             function (event) {
 
                 if (
-                    event.type ===
-                    'ready'
+                    event.type === 'ready'
                 ) {
 
                     setTimeout(
