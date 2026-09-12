@@ -38,9 +38,6 @@
         } catch (e) {}
     }
 
-    /*
-     * СОЗДАНИЕ ШТОРКИ
-     */
     function create() {
 
         if (box) return;
@@ -73,10 +70,6 @@
         box.style.boxShadow =
             '0 8px 30px rgba(0,0,0,0.45)';
 
-        /*
-         * Шторка сама не получает фокус.
-         * Клавиши обрабатываем документом.
-         */
         box.style.pointerEvents = 'none';
 
         for (
@@ -131,9 +124,6 @@
         draw();
     }
 
-    /*
-     * ОТРИСОВКА
-     */
     function draw() {
 
         if (!box) return;
@@ -218,45 +208,16 @@
     }
 
     /*
-     * =========================================================
      * ШТАТНОЕ МЕНЮ LAMPA
-     * =========================================================
-     *
-     * Здесь больше НЕТ собственного Router.call().
-     *
-     * Мы берём настоящий пункт меню Lampa:
-     *
-     * [data-action="main"]
-     * [data-action="movie"]
-     * [data-action="tv"]
-     * [data-action="cartoon"]
-     *
-     * и отправляем ему hover:enter.
-     *
-     * В результате работает оригинальный код menu.js Lampa.
      */
-
     function executeOfficialMenu(action) {
 
         try {
 
-            if (
-                !window.Lampa ||
-                !Lampa.Menu
-            ) {
-
-                notify(
-                    'Lampa.Menu недоступно'
-                );
-
-                return;
-            }
-
             var menu = null;
 
             /*
-             * render() возвращает настоящий
-             * DOM меню Lampa.
+             * Получаем штатное меню
              */
             try {
 
@@ -266,27 +227,54 @@
             } catch (e) {}
 
             /*
-             * Если render() не дал элемент,
-             * пробуем найти его непосредственно
-             * в DOM.
+             * Если меню ещё не создано —
+             * открываем его.
              */
-            var item = null;
-
-            if (menu) {
+            if (
+                !menu ||
+                !menu.length
+            ) {
 
                 try {
 
-                    item =
-                        menu.find(
-                            '.menu__item[data-action="' +
-                            action +
-                            '"]'
-                        );
+                    if (Lampa.Menu.open) {
+                        Lampa.Menu.open();
+                    }
+
                 } catch (e) {}
+
+                setTimeout(
+                    function () {
+
+                        executeOfficialMenu(
+                            action
+                        );
+
+                    },
+                    150
+                );
+
+                return;
             }
 
+            var item = null;
+
             /*
-             * Запасной поиск.
+             * Ищем настоящий пункт Lampa.
+             */
+            try {
+
+                item =
+                    menu.find(
+                        '.menu__item[data-action="' +
+                        action +
+                        '"]'
+                    );
+
+            } catch (e) {}
+
+            /*
+             * Запасной поиск по документу.
              */
             if (
                 !item ||
@@ -305,77 +293,87 @@
                 } catch (e) {}
             }
 
-            /*
-             * Не нашли — открываем штатное меню,
-             * после чего ищем его ещё раз.
-             */
             if (
                 !item ||
                 !item.length
             ) {
 
-                try {
-
-                    Lampa.Menu.open();
-
-                } catch (e) {}
-
-                setTimeout(
-                    function () {
-
-                        try {
-
-                            var realItem =
-                                $(
-                                    '.menu__item[data-action="' +
-                                    action +
-                                    '"]'
-                                );
-
-                            if (
-                                !realItem ||
-                                !realItem.length
-                            ) {
-
-                                notify(
-                                    'Не найден пункт: ' +
-                                    action
-                                );
-
-                                return;
-                            }
-
-                            /*
-                             * ВАЖНО:
-                             * именно hover:enter,
-                             * как в штатном menu.js.
-                             */
-                            realItem.trigger(
-                                'hover:enter'
-                            );
-
-                        } catch (e) {
-
-                            notify(
-                                'MENU: ' +
-                                e.message
-                            );
-                        }
-
-                    },
-                    100
+                notify(
+                    'ПУНКТ НЕ НАЙДЕН: ' +
+                    action
                 );
 
                 return;
             }
 
             /*
-             * ВАЖНО:
-             * точно тот же event,
-             * который использует Lampa.
+             * Переключаем Controller
+             * на штатное меню.
              */
-            item.trigger(
-                'hover:enter'
+            try {
+
+                Lampa.Controller.toggle(
+                    'menu'
+                );
+
+            } catch (e) {}
+
+            /*
+             * Устанавливаем настоящий
+             * фокус Lampa.
+             */
+            try {
+
+                Lampa.Controller.collectionFocus(
+                    item,
+                    menu,
+                    true
+                );
+
+            } catch (e) {
+
+                try {
+
+                    Lampa.Controller.collectionFocus(
+                        item,
+                        menu
+                    );
+
+                } catch (ee) {}
+            }
+
+            /*
+             * Нажимаем OK штатным Controller.
+             */
+            setTimeout(
+                function () {
+
+                    try {
+
+                        Lampa.Controller.enter();
+
+                    } catch (e) {
+
+                        /*
+                         * Последний запасной вариант.
+                         */
+                        try {
+
+                            item.trigger(
+                                'hover:enter'
+                            );
+
+                        } catch (ee) {
+
+                            notify(
+                                'ENTER: ' +
+                                ee.message
+                            );
+                        }
+                    }
+
+                },
+                80
             );
 
         } catch (e) {
@@ -388,15 +386,11 @@
     }
 
     /*
-     * =========================================================
      * ИСТОРИЯ
-     * =========================================================
      *
-     * Оставляем проверенный рабочий вариант.
+     * Этот вариант уже проверен.
      */
     function openHistory() {
-
-        closeNav();
 
         try {
 
@@ -408,60 +402,62 @@
                 Lampa.Favorite.read();
             }
 
-            setTimeout(
-                function () {
+        } catch (e) {}
 
-                    try {
+        setTimeout(
+            function () {
 
-                        Lampa.Router.call(
-                            'favorite',
-                            {
-                                url: '',
-                                title:
-                                    'История просмотров',
-                                component:
-                                    'favorite',
-                                type:
-                                    'history',
-                                page: 1,
-                                filter: ''
-                            }
-                        );
+                try {
 
-                    } catch (e) {
+                    Lampa.Router.call(
+                        'favorite',
+                        {
+                            url: '',
+                            title:
+                                'История просмотров',
+                            component:
+                                'favorite',
+                            type:
+                                'history',
+                            page: 1,
+                            filter: ''
+                        }
+                    );
 
-                        notify(
-                            'ИСТОРИЯ: ' +
-                            e.message
-                        );
-                    }
+                } catch (e) {
 
-                },
-                300
-            );
+                    notify(
+                        'ИСТОРИЯ: ' +
+                        e.message
+                    );
+                }
 
-        } catch (e) {
-
-            notify(
-                'ИСТОРИЯ: ' +
-                e.message
-            );
-        }
+            },
+            300
+        );
     }
 
     /*
-     * =========================================================
      * OK
-     * =========================================================
      */
     function ok() {
 
         if (!visible) return;
 
+        var action =
+            actions[selected];
+
         /*
-         * ИСТОРИЯ
+         * Закрываем только нашу шторку.
          */
-        if (selected === 1) {
+        closeNav();
+
+        /*
+         * История.
+         */
+        if (
+            action === 'history'
+        ) {
 
             openHistory();
 
@@ -469,18 +465,16 @@
         }
 
         /*
-         * Все остальные пункты —
+         * Всё остальное —
          * через штатное меню Lampa.
          */
         executeOfficialMenu(
-            actions[selected]
+            action
         );
     }
 
     /*
-     * =========================================================
      * CONTROLLER
-     * =========================================================
      */
     function controllerName() {
 
@@ -514,12 +508,18 @@
         return '';
     }
 
+    /*
+     * Открываем шторку только
+     * когда Lampa находится наверху.
+     */
     function checkHead() {
 
         var name =
             controllerName();
 
-        if (name === 'head') {
+        if (
+            name === 'head'
+        ) {
 
             openNav();
 
@@ -533,9 +533,7 @@
     }
 
     /*
-     * =========================================================
      * КЛАВИАТУРА
-     * =========================================================
      */
     document.addEventListener(
         'keydown',
@@ -543,7 +541,7 @@
 
             /*
              * Если шторка закрыта —
-             * вообще не вмешиваемся в Lampa.
+             * вообще не вмешиваемся.
              */
             if (!visible) return;
 
@@ -626,9 +624,7 @@
     );
 
     /*
-     * =========================================================
      * START
-     * =========================================================
      */
     create();
 
