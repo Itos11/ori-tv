@@ -1,8 +1,8 @@
 (function () {
     'use strict';
 
-    if (window.PRISMA_NAV_HISTORY) return;
-    window.PRISMA_NAV_HISTORY = true;
+    if (window.PRISMA_NAV_FINAL) return;
+    window.PRISMA_NAV_FINAL = true;
 
     var items = [
         'ГЛАВНОЕ',
@@ -14,46 +14,67 @@
 
     var selected = 0;
     var visible = false;
+
     var box = null;
     var buttons = [];
 
     function notify(text) {
-        if (
-            window.Lampa &&
-            Lampa.Noty &&
-            Lampa.Noty.show
-        ) {
-            Lampa.Noty.show(text);
-        }
+        try {
+            if (
+                window.Lampa &&
+                Lampa.Noty &&
+                Lampa.Noty.show
+            ) {
+                Lampa.Noty.show(text);
+            }
+        } catch (e) {}
+    }
+
+    function source() {
+        try {
+            if (
+                Lampa.Storage &&
+                Lampa.Storage.field
+            ) {
+                return (
+                    Lampa.Storage.field('source') ||
+                    'tmdb'
+                );
+            }
+        } catch (e) {}
+
+        return 'tmdb';
     }
 
     function create() {
+
         if (box) return;
 
         box = document.createElement('div');
-
-        box.id = 'prisma-nav-history';
+        box.id = 'prisma-nav-final';
 
         box.style.position = 'fixed';
         box.style.top = '0';
         box.style.left = '0';
         box.style.right = '0';
-        box.style.height = '100px';
+        box.style.height = '92px';
 
         box.style.zIndex = '999999';
 
         box.style.display = 'none';
+
         box.style.alignItems = 'center';
         box.style.justifyContent = 'center';
 
-        box.style.padding = '0 25px';
+        box.style.padding = '0 20px';
+
         box.style.boxSizing = 'border-box';
 
         box.style.background =
-            'rgba(10,10,10,0.97)';
+            'rgba(12,12,12,0.97)';
 
         box.style.boxShadow =
-            '0 8px 30px rgba(0,0,0,0.5)';
+            '0 8px 30px rgba(0,0,0,0.45)';
 
         box.style.pointerEvents = 'none';
 
@@ -69,33 +90,31 @@
                 '#ffffff';
 
             button.style.fontSize =
-                '21px';
+                '20px';
 
             button.style.fontWeight =
                 '600';
 
             button.style.padding =
-                '15px 24px';
+                '14px 22px';
 
             button.style.margin =
-                '0 3px';
+                '0 2px';
 
             button.style.borderRadius =
-                '9px';
+                '8px';
+
+            button.style.whiteSpace =
+                'nowrap';
 
             button.style.opacity =
-                '0.7';
+                '0.55';
 
             button.style.transform =
                 'scale(1)';
 
             button.style.transition =
-                'transform .18s ease, ' +
-                'background .18s ease, ' +
-                'opacity .18s ease';
-
-            button.style.whiteSpace =
-                'nowrap';
+                'all .16s ease';
 
             box.appendChild(button);
 
@@ -123,7 +142,7 @@
             if (i === selected) {
 
                 buttons[i].style.background =
-                    'rgba(255,255,255,0.20)';
+                    'rgba(255,255,255,0.18)';
 
                 buttons[i].style.opacity =
                     '1';
@@ -137,7 +156,7 @@
                     'transparent';
 
                 buttons[i].style.opacity =
-                    '0.7';
+                    '0.55';
 
                 buttons[i].style.transform =
                     'scale(1)';
@@ -191,11 +210,37 @@
     }
 
     /*
-     * =========================
-     * ИСТОРИЯ
-     * =========================
+     * ГЛАВНОЕ
      */
+    function openMain() {
 
+        closeNav();
+
+        try {
+
+            Lampa.Router.call(
+                'main',
+                {
+                    title:
+                        'Главное - ' +
+                        String(
+                            source()
+                        ).toUpperCase()
+                }
+            );
+
+        } catch (e) {
+
+            notify(
+                'ГЛАВНОЕ: ' +
+                e.message
+            );
+        }
+    }
+
+    /*
+     * ИСТОРИЯ
+     */
     function openHistory() {
 
         closeNav();
@@ -206,7 +251,6 @@
                 Lampa.Favorite &&
                 Lampa.Favorite.read
             ) {
-
                 Lampa.Favorite.read();
             }
 
@@ -252,34 +296,141 @@
     }
 
     /*
-     * =========================
-     * OK
-     * =========================
+     * ФИЛЬМЫ
      */
+    function openMovies() {
 
+        closeNav();
+
+        try {
+
+            Lampa.Router.call(
+                'category',
+                {
+                    url: 'movie',
+
+                    title:
+                        'Фильмы - ' +
+                        String(
+                            source()
+                        ).toUpperCase(),
+
+                    source:
+                        source()
+                }
+            );
+
+        } catch (e) {
+
+            notify(
+                'ФИЛЬМЫ: ' +
+                e.message
+            );
+        }
+    }
+
+    /*
+     * СЕРИАЛЫ
+     */
+    function openSeries() {
+
+        closeNav();
+
+        try {
+
+            Lampa.Router.call(
+                'category',
+                {
+                    url: 'tv',
+
+                    title:
+                        'Сериалы - ' +
+                        String(
+                            source()
+                        ).toUpperCase(),
+
+                    source:
+                        source()
+                }
+            );
+
+        } catch (e) {
+
+            notify(
+                'СЕРИАЛЫ: ' +
+                e.message
+            );
+        }
+    }
+
+    /*
+     * МУЛЬТФИЛЬМЫ
+     */
+    function openCartoons() {
+
+        closeNav();
+
+        try {
+
+            Lampa.Router.call(
+                'category',
+                {
+                    url: 'movie',
+
+                    title:
+                        'Мультфильмы - ' +
+                        String(
+                            source()
+                        ).toUpperCase(),
+
+                    genres: 16
+                }
+            );
+
+        } catch (e) {
+
+            notify(
+                'МУЛЬТФИЛЬМЫ: ' +
+                e.message
+            );
+        }
+    }
+
+    /*
+     * OK
+     */
     function ok() {
 
         if (!visible) return;
 
-        if (selected === 1) {
+        switch (selected) {
 
-            openHistory();
+            case 0:
+                openMain();
+                break;
 
-            return;
+            case 1:
+                openHistory();
+                break;
+
+            case 2:
+                openMovies();
+                break;
+
+            case 3:
+                openSeries();
+                break;
+
+            case 4:
+                openCartoons();
+                break;
         }
-
-        notify(
-            'ВЫБРАНО: ' +
-            items[selected]
-        );
     }
 
     /*
-     * =========================
-     * CONTROLLER
-     * =========================
+     * Определяем, находится ли Lampa
+     * на верхнем контроллере.
      */
-
     function controllerName() {
 
         try {
@@ -288,7 +439,6 @@
                 !Lampa.Controller ||
                 !Lampa.Controller.enabled
             ) {
-
                 return '';
             }
 
@@ -298,12 +448,10 @@
             if (!controller) return '';
 
             if (controller.name) {
-
                 return controller.name;
             }
 
             if (controller._name) {
-
                 return controller._name;
             }
 
@@ -324,18 +472,17 @@
         } else {
 
             if (visible) {
-
                 closeNav();
             }
         }
     }
 
     /*
-     * =========================
      * КЛАВИАТУРА
-     * =========================
+     *
+     * Когда шторка закрыта —
+     * вообще ничего не перехватываем.
      */
-
     document.addEventListener(
         'keydown',
         function (event) {
@@ -345,6 +492,9 @@
             var code =
                 event.keyCode;
 
+            /*
+             * LEFT
+             */
             if (code === 37) {
 
                 left();
@@ -355,6 +505,9 @@
                 return;
             }
 
+            /*
+             * RIGHT
+             */
             if (code === 39) {
 
                 right();
@@ -365,6 +518,9 @@
                 return;
             }
 
+            /*
+             * OK
+             */
             if (code === 13) {
 
                 ok();
@@ -375,6 +531,9 @@
                 return;
             }
 
+            /*
+             * DOWN
+             */
             if (code === 40) {
 
                 closeNav();
@@ -393,6 +552,12 @@
                 return;
             }
 
+            /*
+             * UP
+             *
+             * Пока шторка открыта —
+             * остаёмся в ней.
+             */
             if (code === 38) {
 
                 event.preventDefault();
@@ -406,11 +571,8 @@
     );
 
     /*
-     * =========================
      * START
-     * =========================
      */
-
     create();
 
     setInterval(
