@@ -207,213 +207,180 @@
     }
 
     /*
-     * =====================================================
-     * НАСТОЯЩИЙ ПУНКТ МЕНЮ LAMPA
-     * =====================================================
+     * Находим настоящий пункт штатного
+     * меню Lampa.
      */
+    function findOfficialItem(action) {
 
-    function getOfficialItem(action) {
+        var selectors = [
+            '.menu__item[data-action="' + action + '"]',
+            '.menu__item.selector[data-action="' + action + '"]',
+            '[data-action="' + action + '"]'
+        ];
 
-        try {
+        for (
+            var i = 0;
+            i < selectors.length;
+            i++
+        ) {
 
-            var menu =
-                Lampa.Menu.render();
+            try {
 
-            if (!menu) return null;
+                var element =
+                    document.querySelector(
+                        selectors[i]
+                    );
 
-            /*
-             * В menu.js:
-             *
-             * <li class="menu__item selector">
-             *
-             * и затем:
-             *
-             * data-action="movie"
-             * data-action="tv"
-             * ...
-             */
+                if (element) {
 
-            var element =
-                menu.find(
-                    '.menu__item.selector[data-action="' +
-                    action +
-                    '"]'
-                );
+                    return element;
+                }
 
-            if (
-                element &&
-                element.length
-            ) {
-                return element;
-            }
-
-        } catch (e) {}
+            } catch (e) {}
+        }
 
         return null;
     }
 
     /*
-     * =====================================================
-     * ПЕРЕХОД ЧЕРЕЗ РЕАЛЬНЫЙ CONTROLLER
-     * =====================================================
+     * Выполняем именно штатный hover:enter.
+     *
+     * Никакого Router.call()
+     * Никакого Controller.toggle()
+     * Никакого collectionFocus()
+     * Никакого Controller.enter()
      */
-
-    function executeOfficialMenu(action) {
+    function executeOfficialAction(action) {
 
         try {
 
-            /*
-             * Убеждаемся, что штатное меню
-             * действительно открыто.
-             */
-            if (
-                !Lampa.Menu.opened()
-            ) {
+            var item =
+                findOfficialItem(action);
 
-                Lampa.Menu.open();
+            /*
+             * Если меню уже существует —
+             * используем его сразу.
+             */
+            if (item) {
+
+                triggerHoverEnter(item);
+
+                return;
             }
 
             /*
-             * Даём штатному меню отрисоваться.
+             * Если штатного меню сейчас нет,
+             * открываем его и после отрисовки
+             * ищем пункт повторно.
              */
+            try {
+
+                if (
+                    Lampa.Menu &&
+                    Lampa.Menu.open
+                ) {
+
+                    Lampa.Menu.open();
+                }
+
+            } catch (e) {}
+
             setTimeout(
                 function () {
 
-                    try {
-
-                        var item =
-                            getOfficialItem(
-                                action
-                            );
-
-                        if (
-                            !item ||
-                            !item.length
-                        ) {
-
-                            notify(
-                                'НЕ НАШЁЛ: ' +
-                                action
-                            );
-
-                            return;
-                        }
-
-                        /*
-                         * Это именно тот Controller,
-                         * который используется menu.js.
-                         */
-                        var controller =
-                            Lampa.Controller.enabled();
-
-                        if (!controller) {
-
-                            notify(
-                                'CONTROLLER НЕ НАЙДЕН'
-                            );
-
-                            return;
-                        }
-
-                        /*
-                         * Переключаем Controller
-                         * именно на menu.
-                         */
-                        Lampa.Controller.toggle(
-                            'menu'
+                    var realItem =
+                        findOfficialItem(
+                            action
                         );
 
-                        /*
-                         * collectionFocus() из твоего
-                         * controller.js вызывает
-                         * Navigator.focus().
-                         *
-                         * Это устанавливает
-                         * select_active.
-                         */
-                        setTimeout(
-                            function () {
-
-                                try {
-
-                                    Lampa.Controller.collectionFocus(
-                                        item,
-                                        Lampa.Menu.render(),
-                                        true
-                                    );
-
-                                } catch (e) {
-
-                                    notify(
-                                        'FOCUS: ' +
-                                        e.message
-                                    );
-
-                                    return;
-                                }
-
-                                /*
-                                 * Теперь enter() использует
-                                 * select_active и делает:
-                                 *
-                                 * Utils.trigger(
-                                 *     select_active,
-                                 *     'hover:enter'
-                                 * )
-                                 *
-                                 * То есть запускается
-                                 * оригинальный menu.js.
-                                 */
-                                setTimeout(
-                                    function () {
-
-                                        try {
-
-                                            Lampa.Controller.enter();
-
-                                        } catch (e) {
-
-                                            notify(
-                                                'ENTER: ' +
-                                                e.message
-                                            );
-                                        }
-
-                                    },
-                                    100
-                                );
-
-                            },
-                            80
-                        );
-
-                    } catch (e) {
+                    if (!realItem) {
 
                         notify(
-                            'MENU: ' +
-                            e.message
+                            'ПУНКТ НЕ НАЙДЕН: ' +
+                            action
                         );
+
+                        return;
                     }
 
+                    triggerHoverEnter(
+                        realItem
+                    );
+
                 },
-                120
+                150
             );
 
         } catch (e) {
 
             notify(
-                'OPEN MENU: ' +
+                'MENU: ' +
                 e.message
             );
         }
     }
 
     /*
-     * =====================================================
-     * ИСТОРИЯ
-     * =====================================================
+     * Настоящее событие Lampa.
      */
+    function triggerHoverEnter(element) {
 
+        /*
+         * В Lampa используется jQuery.
+         */
+        try {
+
+            if (
+                window.jQuery &&
+                window.jQuery.fn &&
+                window.jQuery.fn.trigger
+            ) {
+
+                window.jQuery(
+                    element
+                ).trigger(
+                    'hover:enter'
+                );
+
+                return;
+            }
+
+        } catch (e) {}
+
+        /*
+         * Запасной вариант без jQuery.
+         */
+        try {
+
+            var event =
+                new CustomEvent(
+                    'hover:enter',
+                    {
+                        bubbles: true,
+                        cancelable: true
+                    }
+                );
+
+            element.dispatchEvent(
+                event
+            );
+
+            return;
+
+        } catch (e) {
+
+            notify(
+                'EVENT: ' +
+                e.message
+            );
+        }
+    }
+
+    /*
+     * ИСТОРИЯ
+     *
+     * Не меняем рабочий вариант.
+     */
     function openHistory() {
 
         try {
@@ -462,11 +429,8 @@
     }
 
     /*
-     * =====================================================
      * OK
-     * =====================================================
      */
-
     function ok() {
 
         if (!visible) return;
@@ -474,15 +438,8 @@
         var action =
             actions[selected];
 
-        /*
-         * Закрываем только нашу Prisma-шторку.
-         */
         closeNav();
 
-        /*
-         * История оставляем как есть —
-         * она уже доказанно работает.
-         */
         if (
             action === 'history'
         ) {
@@ -492,24 +449,14 @@
             return;
         }
 
-        /*
-         * Главное / Фильмы /
-         * Сериалы / Мультфильмы
-         *
-         * идут через настоящий
-         * Lampa.Menu -> Controller -> enter.
-         */
-        executeOfficialMenu(
+        executeOfficialAction(
             action
         );
     }
 
     /*
-     * =====================================================
-     * CONTROLLER
-     * =====================================================
+     * Текущий Controller.
      */
-
     function controllerName() {
 
         try {
@@ -528,10 +475,12 @@
             if (!controller) return '';
 
             if (controller.name) {
+
                 return controller.name;
             }
 
             if (controller._name) {
+
                 return controller._name;
             }
 
@@ -540,6 +489,9 @@
         return '';
     }
 
+    /*
+     * Показываем шторку только наверху.
+     */
     function checkHead() {
 
         var name =
@@ -554,25 +506,19 @@
         } else {
 
             if (visible) {
+
                 closeNav();
             }
         }
     }
 
     /*
-     * =====================================================
      * КЛАВИАТУРА
-     * =====================================================
      */
-
     document.addEventListener(
         'keydown',
         function (event) {
 
-            /*
-             * Пока наша шторка закрыта,
-             * Lampa получает клавиши нормально.
-             */
             if (!visible) return;
 
             var code =
@@ -654,11 +600,8 @@
     );
 
     /*
-     * =====================================================
      * START
-     * =====================================================
      */
-
     create();
 
     setInterval(
