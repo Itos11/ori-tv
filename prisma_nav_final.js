@@ -122,75 +122,13 @@
         }
     }
 
-    function openHistory() {
-
-        closeNav();
-
-        try {
-
-            if (
-                Lampa.Favorite &&
-                Lampa.Favorite.read
-            ) {
-                Lampa.Favorite.read();
-            }
-
-            setTimeout(function () {
-
-                try {
-
-                    if (
-                        Lampa.Router &&
-                        Lampa.Router.call
-                    ) {
-
-                        Lampa.Router.call(
-                            'favorite',
-                            {
-                                url: '',
-                                title: 'История просмотров',
-                                component: 'favorite',
-                                type: 'history',
-                                page: 1,
-                                filter: ''
-                            }
-                        );
-
-                    } else {
-
-                        notify(
-                            'Router.call НЕ НАЙДЕН'
-                        );
-                    }
-
-                } catch (e) {
-
-                    notify(
-                        'ИСТОРИЯ: ' + e.message
-                    );
-                }
-
-            }, 300);
-
-        } catch (e) {
-
-            notify(
-                'ИСТОРИЯ: ' + e.message
-            );
-        }
-    }
-
     function ok() {
         if (!visible) return;
 
-        if (selected === 1) {
-            openHistory();
-        } else {
-            notify(
-                'ВЫБРАНО: ' +
-                items[selected]
-            );
-        }
+        notify(
+            'ВЫБРАНО: ' +
+            items[selected]
+        );
     }
 
     function controllerName() {
@@ -241,6 +179,7 @@
 
             if (code === 37) {
                 left();
+
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -248,6 +187,7 @@
 
             if (code === 39) {
                 right();
+
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -255,6 +195,7 @@
 
             if (code === 13) {
                 ok();
+
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -289,7 +230,7 @@
     );
 
     notify(
-        'PRISMA NAV HISTORY ГОТОВ'
+        'PRISMA NAV FINAL ГОТОВ'
     );
 
 })();
