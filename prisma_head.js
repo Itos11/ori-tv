@@ -27,11 +27,23 @@
         }
     ];
 
-    var elements = [];
+    var added = false;
+
+    function notify(text) {
+        try {
+            if (
+                window.Lampa &&
+                Lampa.Noty &&
+                Lampa.Noty.show
+            ) {
+                Lampa.Noty.show(text);
+            }
+        } catch (e) {}
+    }
 
     /*
      * ---------------------------------------------------------
-     * НАЙТИ ШТАТНЫЙ ПУНКТ МЕНЮ LAMPA
+     * ИЩЕМ НАСТОЯЩИЙ ПУНКТ ШТАТНОГО МЕНЮ
      * ---------------------------------------------------------
      */
 
@@ -39,45 +51,33 @@
 
         try {
 
-            var selectors = [
-                '.menu__item[data-action="' + action + '"]',
-                '.menu__item.selector[data-action="' + action + '"]'
-            ];
+            var item =
+                document.querySelector(
+                    '.menu__item[data-action="' +
+                    action +
+                    '"]'
+                );
 
-            for (
-                var i = 0;
-                i < selectors.length;
-                i++
-            ) {
+            return item;
 
-                var element =
-                    document.querySelector(
-                        selectors[i]
-                    );
+        } catch (e) {
 
-                if (element) {
-                    return element;
-                }
-            }
-
-        } catch (e) {}
-
-        return null;
+            return null;
+        }
     }
 
     /*
      * ---------------------------------------------------------
-     * ВЫЗОВ ШТАТНОГО ДЕЙСТВИЯ LAMPA
+     * ЗАПУСК ШТАТНОГО ДЕЙСТВИЯ
      * ---------------------------------------------------------
      */
 
-    function execute(action) {
+    function runAction(action) {
 
         /*
-         * ИСТОРИЯ
-         *
-         * Оставляем уже проверенный вариант.
+         * История — наш уже рабочий вариант.
          */
+
         if (action === 'history') {
 
             try {
@@ -86,7 +86,6 @@
                     Lampa.Favorite &&
                     Lampa.Favorite.read
                 ) {
-
                     Lampa.Favorite.read();
                 }
 
@@ -128,74 +127,70 @@
         }
 
         /*
-         * Для остальных пунктов НЕ используем
-         * Router.call().
+         * Остальные пункты:
          *
-         * Берём настоящий пункт штатного меню
-         * и запускаем его hover:enter.
+         * НЕ вызываем Router.call().
+         *
+         * Находим реальный пункт меню Lampa
+         * и передаём ему штатный hover:enter.
          */
-        try {
 
-            var item =
-                findMenuItem(action);
+        var item =
+            findMenuItem(action);
 
-            if (!item) {
+        if (!item) {
 
-                /*
-                 * Если меню ещё не создано,
-                 * создаём его штатным способом.
-                 */
+            /*
+             * Меню может ещё не существовать
+             * в DOM.
+             */
+
+            try {
+
                 if (
                     Lampa.Menu &&
                     Lampa.Menu.open
                 ) {
-
                     Lampa.Menu.open();
                 }
 
-                setTimeout(
-                    function () {
+            } catch (e) {}
 
-                        var realItem =
-                            findMenuItem(
-                                action
-                            );
+            setTimeout(
+                function () {
 
-                        if (!realItem) {
-
-                            notify(
-                                'Не найден пункт: ' +
-                                action
-                            );
-
-                            return;
-                        }
-
-                        triggerEnter(
-                            realItem
+                    var real =
+                        findMenuItem(
+                            action
                         );
 
-                    },
-                    150
-                );
+                    if (!real) {
 
-                return;
-            }
+                        notify(
+                            'Не найден пункт: ' +
+                            action
+                        );
 
-            triggerEnter(item);
+                        return;
+                    }
 
-        } catch (e) {
+                    triggerEnter(
+                        real
+                    );
 
-            notify(
-                'MENU: ' +
-                e.message
+                },
+                150
             );
+
+            return;
         }
+
+        triggerEnter(item);
     }
 
     /*
      * ---------------------------------------------------------
-     * HOVER:ENTER
+     * ШТАТНЫЙ EVENT LAMPA
      * ---------------------------------------------------------
      */
 
@@ -205,8 +200,7 @@
 
             if (
                 window.jQuery &&
-                window.jQuery.fn &&
-                window.jQuery.fn.trigger
+                window.jQuery.fn
             ) {
 
                 window.jQuery(
@@ -222,17 +216,14 @@
 
         try {
 
-            var event =
+            element.dispatchEvent(
                 new CustomEvent(
                     'hover:enter',
                     {
                         bubbles: true,
                         cancelable: true
                     }
-                );
-
-            element.dispatchEvent(
-                event
+                )
             );
 
         } catch (e) {
@@ -246,45 +237,107 @@
 
     /*
      * ---------------------------------------------------------
-     * СОЗДАНИЕ ЭЛЕМЕНТА В НАСТОЯЩЕМ LAMPA HEAD
+     * СОЗДАЁМ ПУНКТЫ В HEAD
      * ---------------------------------------------------------
      */
 
-    function createItem(item) {
+    function addItems() {
 
-        var element =
-            $('<div class="selector prisma-head-item"></div>');
+        if (added) return;
 
-        element.text(
-            item.title
-        );
+        if (
+            !window.Lampa ||
+            !Lampa.Head ||
+            !Lampa.Head.addElement ||
+            !Lampa.Head.render
+        ) {
+            return false;
+        }
 
         /*
-         * При OK Lampa сама вызывает
-         * это hover:enter через Controller.
+         * КЛЮЧЕВОЙ МОМЕНТ:
+         *
+         * проверяем, что Head уже реально
+         * проинициализирован.
          */
-        element.on(
-            'hover:enter',
-            function () {
 
-                execute(
-                    item.action
+        var head = null;
+
+        try {
+
+            head =
+                Lampa.Head.render();
+
+        } catch (e) {
+
+            return false;
+        }
+
+        if (!head) {
+            return false;
+        }
+
+        try {
+
+            if (
+                !head.find(
+                    '.head__actions'
+                ).length
+            ) {
+                return false;
+            }
+
+        } catch (e) {
+
+            return false;
+        }
+
+        /*
+         * Теперь addElement() уже безопасен.
+         */
+
+        for (
+            var i = items.length - 1;
+            i >= 0;
+            i--
+        ) {
+
+            (function (item) {
+
+                var element =
+                    $(
+                        '<div class="head__action selector prisma-head-item">' +
+                            item.title +
+                        '</div>'
+                    );
+
+                element.on(
+                    'hover:enter',
+                    function () {
+
+                        runAction(
+                            item.action
+                        );
+
+                    }
                 );
 
-            }
+                Lampa.Head.addElement(
+                    element
+                );
+
+            })(items[i]);
+        }
+
+        added = true;
+
+        style();
+
+        notify(
+            'PRISMA HEAD ГОТОВ'
         );
 
-        /*
-         * Добавляем элемент именно
-         * в штатный Lampa.Head.
-         */
-        Lampa.Head.addElement(
-            element
-        );
-
-        elements.push(
-            element
-        );
+        return true;
     }
 
     /*
@@ -304,18 +357,17 @@
         }
 
         var css =
-            document.createElement('style');
+            document.createElement(
+                'style'
+            );
 
         css.id =
             'prisma-head-style';
 
         css.innerHTML = `
-            .head__actions {
-                gap: 4px !important;
-            }
-
             .prisma-head-item {
                 display: flex !important;
+
                 align-items: center !important;
                 justify-content: center !important;
 
@@ -329,13 +381,13 @@
 
                 color: #ffffff !important;
 
-                font-size: 19px !important;
+                font-size: 18px !important;
 
                 font-weight: 600 !important;
 
                 white-space: nowrap !important;
 
-                opacity: 0.65;
+                opacity: .72;
 
                 transition:
                     transform .16s ease,
@@ -344,18 +396,14 @@
             }
 
             .prisma-head-item.focus,
-            .prisma-head-item:hover {
+            .prisma-head-item.hover {
                 opacity: 1 !important;
 
                 background:
-                    rgba(255,255,255,0.18) !important;
+                    rgba(255,255,255,.18) !important;
 
                 transform:
-                    scale(1.06);
-            }
-
-            .head__action.prisma-head-item {
-                width: auto !important;
+                    scale(1.05);
             }
         `;
 
@@ -366,93 +414,62 @@
 
     /*
      * ---------------------------------------------------------
-     * START
+     * ЖДЁМ ГОТОВУЮ LAMPA HEAD
      * ---------------------------------------------------------
+     *
+     * Не полагаемся только на app/ready:
+     * плагин может загрузиться как до ready,
+     * так и после него.
      */
 
-    function start() {
+    var attempts = 0;
+
+    function waitForHead() {
+
+        if (added) return;
+
+        attempts++;
 
         if (
-            !window.Lampa ||
-            !Lampa.Head
+            addItems()
         ) {
-
-            setTimeout(
-                start,
-                500
-            );
-
             return;
         }
-
-        if (
-            !Lampa.Head.addElement
-        ) {
-
-            notify(
-                'Lampa.Head.addElement отсутствует'
-            );
-
-            return;
-        }
-
-        style();
 
         /*
-         * Добавляем в обратном порядке,
-         * потому что Lampa.Head.addElement()
-         * делает prepend().
+         * Максимум примерно 30 секунд.
          */
-        for (
-            var i = items.length - 1;
-            i >= 0;
-            i--
-        ) {
+        if (attempts < 300) {
 
-            createItem(
-                items[i]
+            setTimeout(
+                waitForHead,
+                100
+            );
+
+        } else {
+
+            notify(
+                'PRISMA HEAD: LAMPA HEAD не готов'
             );
         }
-
-        notify(
-            'PRISMA HEAD ГОТОВ'
-        );
-    }
-
-    function notify(text) {
-
-        try {
-
-            if (
-                Lampa.Noty &&
-                Lampa.Noty.show
-            ) {
-
-                Lampa.Noty.show(
-                    text
-                );
-            }
-
-        } catch (e) {}
     }
 
     /*
-     * Lampa может ещё не быть готова
-     * в момент загрузки плагина.
+     * Запускаем после загрузки DOM.
      */
     if (
-        window.Lampa &&
-        Lampa.Head
+        document.readyState ===
+        'loading'
     ) {
 
-        start();
+        document.addEventListener(
+            'DOMContentLoaded',
+            waitForHead
+        );
 
     } else {
 
-        setTimeout(
-            start,
-            500
-        );
+        waitForHead();
     }
 
 })();
