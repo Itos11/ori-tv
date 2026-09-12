@@ -2,147 +2,157 @@
     'use strict';
 
     if (!window.Lampa) return;
+    if (window.__LAMPA_TOP_NAV__) return;
 
-    var items = [
-        { title: 'ГЛАВНОЕ',    words: ['главн', 'home'] },
-        { title: 'ИСТОРИЯ',    words: ['истори', 'history'] },
-        { title: 'ФИЛЬМЫ',     words: ['фильм', 'movie'] },
-        { title: 'СЕРИАЛЫ',    words: ['сериал', 'series', 'tv'] },
-        { title: 'МУЛЬТФИЛЬМЫ', words: ['мульт', 'анимац', 'cartoon'] }
+    window.__LAMPA_TOP_NAV__ = true;
+
+    var ITEMS = [
+        {
+            id: 'home',
+            title: 'ГЛАВНОЕ',
+            keywords: ['главное', 'главная', 'home']
+        },
+        {
+            id: 'history',
+            title: 'ИСТОРИЯ',
+            keywords: ['история', 'history']
+        },
+        {
+            id: 'movie',
+            title: 'ФИЛЬМЫ',
+            keywords: ['фильмы', 'фильмы', 'movie']
+        },
+        {
+            id: 'serial',
+            title: 'СЕРИАЛЫ',
+            keywords: ['сериалы', 'сериал', 'series', 'tv']
+        },
+        {
+            id: 'cartoon',
+            title: 'МУЛЬТФИЛЬМЫ',
+            keywords: ['мультфильмы', 'мультфильм', 'мульт', 'анимация', 'cartoon']
+        }
     ];
 
-    var nav;
+    var nav = null;
     var current = 0;
-    var active = false;
+    var opened = false;
 
-    function style() {
-        if ($('#lampa-top-nav-style').length) return;
+    function addStyle() {
+        if ($('#lampa-top-navigation-style').length) return;
 
-        $('head').append(`
-            <style id="lampa-top-nav-style">
+        $('head').append(
+            '<style id="lampa-top-navigation-style">' +
 
-                .lampa-top-nav {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    height: 76px;
-                    z-index: 999999;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    padding: 0 30px;
-                    box-sizing: border-box;
+            '.ltn {' +
+                'position:fixed;' +
+                'top:0;' +
+                'left:0;' +
+                'right:0;' +
+                'height:74px;' +
+                'z-index:999999;' +
+                'display:flex;' +
+                'align-items:center;' +
+                'justify-content:center;' +
+                'padding:0 30px;' +
+                'gap:5px;' +
+                'box-sizing:border-box;' +
+                'background:rgba(10,10,10,.97);' +
+                'box-shadow:0 4px 20px rgba(0,0,0,.35);' +
+                'font-family:Arial,sans-serif;' +
+                'transition:transform .2s ease,opacity .2s ease;' +
+            '}' +
 
-                    background: rgba(12,12,12,.96);
-                    box-shadow: 0 5px 20px rgba(0,0,0,.35);
+            '.ltn.ltn-hide {' +
+                'transform:translateY(-100%);' +
+                'opacity:0;' +
+                'pointer-events:none;' +
+            '}' +
 
-                    transition: transform .2s ease;
-                }
+            '.ltn-item {' +
+                'position:relative;' +
+                'height:48px;' +
+                'display:flex;' +
+                'align-items:center;' +
+                'justify-content:center;' +
+                'padding:0 20px;' +
+                'border-radius:8px;' +
+                'box-sizing:border-box;' +
+                'color:rgba(255,255,255,.65);' +
+                'font-size:17px;' +
+                'font-weight:600;' +
+                'white-space:nowrap;' +
+                'transition:background .12s ease,color .12s ease,transform .12s ease;' +
+            '}' +
 
-                .lampa-top-nav.hidden {
-                    transform: translateY(-100%);
-                }
+            '.ltn-item.ltn-selected {' +
+                'color:#fff;' +
+            '}' +
 
-                .lampa-top-nav__item {
-                    position: relative;
+            '.ltn-item.ltn-selected:after {' +
+                'content:"";' +
+                'position:absolute;' +
+                'left:20px;' +
+                'right:20px;' +
+                'bottom:2px;' +
+                'height:3px;' +
+                'border-radius:3px;' +
+                'background:#fff;' +
+            '}' +
 
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
+            '.ltn-item.ltn-focus {' +
+                'color:#fff;' +
+                'background:rgba(255,255,255,.16);' +
+                'transform:scale(1.04);' +
+            '}' +
 
-                    height: 48px;
-                    padding: 0 22px;
+            '@media screen and (max-width:1000px) {' +
+                '.ltn {' +
+                    'padding:0 8px;' +
+                    'gap:1px;' +
+                '}' +
 
-                    border-radius: 8px;
+                '.ltn-item {' +
+                    'padding:0 10px;' +
+                    'font-size:13px;' +
+                '}' +
 
-                    color: rgba(255,255,255,.65);
+                '.ltn-item.ltn-selected:after {' +
+                    'left:10px;' +
+                    'right:10px;' +
+                '}' +
+            '}' +
 
-                    font-size: 18px;
-                    font-weight: 600;
-
-                    white-space: nowrap;
-
-                    transition:
-                        background .15s ease,
-                        color .15s ease,
-                        transform .15s ease;
-                }
-
-                .lampa-top-nav__item.active {
-                    color: #fff;
-                }
-
-                .lampa-top-nav__item.active:after {
-                    content: '';
-
-                    position: absolute;
-                    left: 22px;
-                    right: 22px;
-                    bottom: 2px;
-
-                    height: 3px;
-
-                    border-radius: 3px;
-
-                    background: currentColor;
-                }
-
-                .lampa-top-nav__item.focus {
-                    color: #fff;
-                    background: rgba(255,255,255,.16);
-                    transform: scale(1.04);
-                }
-
-                @media screen and (max-width: 1000px) {
-
-                    .lampa-top-nav {
-                        padding: 0 10px;
-                        gap: 2px;
-                    }
-
-                    .lampa-top-nav__item {
-                        padding: 0 11px;
-                        font-size: 14px;
-                    }
-
-                    .lampa-top-nav__item.active:after {
-                        left: 11px;
-                        right: 11px;
-                    }
-                }
-
-            </style>
-        `);
+            '</style>'
+        );
     }
 
     function create() {
-
         if (nav) return;
 
-        nav = $('<div class="lampa-top-nav"></div>');
+        nav = $('<div class="ltn"></div>');
 
-        items.forEach(function (item, index) {
+        ITEMS.forEach(function (item, index) {
 
-            var button = $('<div class="lampa-top-nav__item selector">' +
+            var button = $(
+                '<div class="ltn-item selector">' +
                 item.title +
-            '</div>');
+                '</div>'
+            );
 
             button.on('hover:focus', function () {
                 current = index;
-                active = true;
                 render();
             });
 
             button.on('hover:enter', function () {
                 current = index;
-                open(item);
+                openItem(item);
             });
 
             button.on('click', function () {
                 current = index;
-                open(item);
+                openItem(item);
             });
 
             nav.append(button);
@@ -154,226 +164,254 @@
     }
 
     function render() {
-
         if (!nav) return;
 
-        nav.find('.lampa-top-nav__item').each(function (index) {
+        nav.find('.ltn-item').each(function (index) {
 
-            $(this)
-                .toggleClass('active', index === current)
-                .toggleClass('focus', active && index === current);
+            $(this).toggleClass(
+                'ltn-selected',
+                index === current
+            );
+
+            $(this).toggleClass(
+                'ltn-focus',
+                opened && index === current
+            );
 
         });
     }
 
     function show() {
-
         create();
 
-        nav.removeClass('hidden');
+        nav.removeClass('ltn-hide');
 
-        active = true;
+        opened = true;
 
         render();
     }
 
     function hide() {
-
         if (!nav) return;
 
-        nav.addClass('hidden');
+        nav.addClass('ltn-hide');
 
-        active = false;
+        opened = false;
 
         render();
     }
 
-    function text(element) {
-
+    function getText(element) {
         return ($(element).text() || '')
+            .replace(/\s+/g, ' ')
             .trim()
             .toLowerCase();
-
     }
 
     function findMenuItem(item) {
 
-        var result = $();
+        var result = null;
 
-        $('.menu__item, .menu .selector').each(function () {
+        var elements = $(
+            '.menu__item,' +
+            '.menu .selector,' +
+            '.menu-item,' +
+            '.menu .menu__item'
+        );
 
-            if (result.length) return;
+        elements.each(function () {
 
-            var value = text(this);
+            if (result) return;
 
-            item.words.some(function (word) {
+            var text = getText(this);
 
-                if (value.indexOf(word) !== -1) {
+            if (!text) return;
 
-                    result = $(this);
+            for (var i = 0; i < item.keywords.length; i++) {
 
-                    return true;
+                if (
+                    text.indexOf(
+                        item.keywords[i].toLowerCase()
+                    ) !== -1
+                ) {
+                    result = this;
+                    break;
                 }
 
-                return false;
-
-            }, this);
+            }
 
         });
 
-        return result.first();
+        return result ? $(result) : $();
     }
 
-    function open(item) {
+    function openItem(item) {
 
         hide();
-
-        /*
-         * Ищем соответствующий стандартный
-         * пункт меню Lampa.
-         */
 
         var menuItem = findMenuItem(item);
 
         if (menuItem.length) {
 
             setTimeout(function () {
-                menuItem.trigger('hover:enter');
-            }, 50);
+
+                try {
+                    menuItem.trigger('hover:enter');
+                } catch (e) {
+                    menuItem.click();
+                }
+
+            }, 100);
 
             return;
         }
 
         /*
-         * Если пункт не найден —
-         * возвращаем стандартное меню.
+         * Если пункт не найден,
+         * открываем стандартное меню Lampa.
          */
 
-        try {
-            Lampa.Controller.toggle('menu');
-        } catch (e) {}
+        setTimeout(function () {
 
+            try {
+                Lampa.Controller.toggle('menu');
+            } catch (e) {}
+
+        }, 100);
     }
 
-    function keyboard() {
+    function isModalOpen() {
 
-        document.addEventListener('keydown', function (event) {
+        if ($('.player:visible').length) return true;
+        if ($('.modal:visible').length) return true;
+        if ($('.keyboard:visible').length) return true;
 
-            if (!active) {
+        return false;
+    }
 
-                /*
-                 * Стрелка ВВЕРХ открывает шторку.
-                 */
+    function installKeyboard() {
 
-                if (event.keyCode === 38) {
+        document.addEventListener(
+            'keydown',
+            function (event) {
 
-                    show();
-
+                if (isModalOpen()) {
+                    return;
                 }
 
-                return;
-            }
+                var key = event.keyCode;
 
-            /*
-             * ВЛЕВО
-             */
+                /*
+                 * ВВЕРХ — открыть шторку
+                 */
 
-            if (event.keyCode === 37) {
+                if (!opened) {
 
-                event.preventDefault();
+                    if (key === 38) {
 
-                current--;
+                        event.preventDefault();
 
-                if (current < 0)
-                    current = items.length - 1;
+                        show();
 
-                render();
+                    }
 
-                return;
-            }
+                    return;
+                }
 
-            /*
-             * ВПРАВО
-             */
+                /*
+                 * ВЛЕВО
+                 */
 
-            if (event.keyCode === 39) {
+                if (key === 37) {
 
-                event.preventDefault();
+                    event.preventDefault();
+                    event.stopPropagation();
 
-                current++;
+                    current--;
 
-                if (current >= items.length)
-                    current = 0;
+                    if (current < 0) {
+                        current = ITEMS.length - 1;
+                    }
 
-                render();
+                    render();
 
-                return;
-            }
+                    return;
+                }
 
-            /*
-             * OK
-             */
+                /*
+                 * ВПРАВО
+                 */
 
-            if (
-                event.keyCode === 13 ||
-                event.keyCode === 23
-            ) {
+                if (key === 39) {
 
-                event.preventDefault();
+                    event.preventDefault();
+                    event.stopPropagation();
 
-                open(items[current]);
+                    current++;
 
-                return;
-            }
+                    if (current >= ITEMS.length) {
+                        current = 0;
+                    }
 
-            /*
-             * ВНИЗ
-             */
+                    render();
 
-            if (event.keyCode === 40) {
+                    return;
+                }
 
-                event.preventDefault();
+                /*
+                 * OK
+                 */
 
-                hide();
+                if (key === 13 || key === 23) {
 
-                try {
-                    Lampa.Controller.toggle('content');
-                } catch (e) {}
+                    event.preventDefault();
+                    event.stopPropagation();
 
-                return;
-            }
+                    openItem(ITEMS[current]);
 
-            /*
-             * НАЗАД
-             */
+                    return;
+                }
 
-            if (
-                event.keyCode === 27 ||
-                event.keyCode === 4 ||
-                event.keyCode === 461
-            ) {
+                /*
+                 * ВНИЗ
+                 */
 
-                event.preventDefault();
+                if (key === 40) {
 
-                hide();
+                    event.preventDefault();
+                    event.stopPropagation();
 
-            }
+                    hide();
 
-        }, true);
+                    return;
+                }
 
+                /*
+                 * BACK
+                 */
+
+                if (
+                    key === 27 ||
+                    key === 4 ||
+                    key === 461
+                ) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    hide();
+
+                    return;
+                }
+
+            },
+            true
+        );
     }
 
-    function init() {
+    function events() {
 
-        style();
-
-        create();
-
-        keyboard();
-
-        /*
-         * Когда Lampa полностью загрузилась.
-         */
+        if (!Lampa.Listener) return;
 
         Lampa.Listener.follow('app', function (event) {
 
@@ -382,14 +420,41 @@
                 setTimeout(function () {
 
                     create();
-
                     show();
 
-                }, 1000);
+                }, 1200);
 
             }
 
         });
+
+        Lampa.Listener.follow('activity', function (event) {
+
+            if (event.type === 'start') {
+
+                setTimeout(function () {
+
+                    if (!isModalOpen()) {
+                        create();
+                    }
+
+                }, 500);
+
+            }
+
+        });
+
+    }
+
+    function init() {
+
+        addStyle();
+
+        create();
+
+        installKeyboard();
+
+        events();
 
     }
 
