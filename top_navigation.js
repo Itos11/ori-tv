@@ -1,10 +1,21 @@
-(function(){
+(function () {
+    'use strict';
 
-    if (!window.Lampa) {
-        alert('LAMPA NOT FOUND');
-        return;
+    if (!window.Lampa) return;
+
+    function start() {
+        if (Lampa.Noty && Lampa.Noty.show) {
+            Lampa.Noty.show('ШТОРКА: ПЛАГИН РАБОТАЕТ');
+        }
     }
 
-    alert('PLUGIN WORKS');
-
+    if (window.appready) {
+        start();
+    } else if (Lampa.Listener) {
+        Lampa.Listener.follow('app', function (event) {
+            if (event.type == 'ready') {
+                start();
+            }
+        });
+    }
 })();
