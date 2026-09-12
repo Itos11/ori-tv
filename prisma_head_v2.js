@@ -1,94 +1,179 @@
 (function () {
     'use strict';
 
-    // Защита от повторной загрузки
-    if (window.PRISMA_HEAD_V2) return;
-    window.PRISMA_HEAD_V2 = true;
+    if (window.PRISMA_HEAD_V2_NEW) return;
+    window.PRISMA_HEAD_V2_NEW = true;
 
     var ITEMS = [
-        {
-            title: 'ГЛАВНОЕ',
-            action: 'main'
-        },
-        {
-            title: 'ИСТОРИЯ',
-            action: 'history'
-        },
-        {
-            title: 'ФИЛЬМЫ',
-            action: 'movie'
-        },
-        {
-            title: 'СЕРИАЛЫ',
-            action: 'tv'
-        },
-        {
-            title: 'МУЛЬТФИЛЬМЫ',
-            action: 'cartoon'
-        }
+        { title: 'ГЛАВНОЕ', action: 'main' },
+        { title: 'ИСТОРИЯ', action: 'history' },
+        { title: 'ФИЛЬМЫ', action: 'movie' },
+        { title: 'СЕРИАЛЫ', action: 'tv' },
+        { title: 'МУЛЬТФИЛЬМЫ', action: 'cartoon' }
     ];
 
     var installed = false;
 
+
     /*
-     * ---------------------------------------------------------
-     * СТИЛИ
-     * ---------------------------------------------------------
+     * =========================================================
+     * СТИЛИ PRISMA
+     * =========================================================
      */
 
     function installStyle() {
 
-        if (document.getElementById('prisma-head-v2-style')) {
+        if (document.getElementById('prisma-head-v2-new-style')) {
             return;
         }
 
         var style = document.createElement('style');
 
-        style.id = 'prisma-head-v2-style';
+        style.id = 'prisma-head-v2-new-style';
 
         style.innerHTML = `
-            .prisma-head-v2 {
+
+            /*
+             * Главный контейнер нашей навигации
+             */
+
+            .prisma-head-v2-wrap {
+                position: fixed !important;
+
+                left: 50% !important;
+                top: 8px !important;
+
+                transform: translateX(-50%) !important;
+
                 display: flex !important;
+
                 align-items: center !important;
                 justify-content: center !important;
 
-                height: 52px !important;
+                gap: 6px !important;
 
-                padding: 0 18px !important;
-                margin: 0 3px !important;
+                height: 64px !important;
 
-                border-radius: 9px !important;
+                padding: 0 10px !important;
 
-                color: #ffffff !important;
-
-                font-size: 18px !important;
-                font-weight: 600 !important;
-
-                line-height: 52px !important;
+                z-index: 99999 !important;
 
                 white-space: nowrap !important;
 
-                opacity: 0.70 !important;
+                pointer-events: auto !important;
+            }
+
+
+            /*
+             * Наши пять кнопок
+             */
+
+            .prisma-head-v2 {
+                position: relative !important;
+
+                display: flex !important;
+
+                align-items: center !important;
+                justify-content: center !important;
+
+                height: 48px !important;
+
+                padding: 0 17px !important;
+
+                margin: 0 !important;
+
+                border-radius: 9px !important;
 
                 box-sizing: border-box !important;
 
+                color: rgba(255,255,255,.82) !important;
+
+                font-size: 17px !important;
+
+                font-weight: 600 !important;
+
+                line-height: 48px !important;
+
+                white-space: nowrap !important;
+
+                opacity: .82 !important;
+
+                background: transparent !important;
+
                 transition:
-                    transform 0.12s ease,
-                    background 0.12s ease,
-                    opacity 0.12s ease !important;
+                    background .12s ease,
+                    transform .12s ease,
+                    opacity .12s ease !important;
             }
+
+
+            /*
+             * Фокус
+             */
 
             .prisma-head-v2.focus {
+                color: #ffffff !important;
+
                 opacity: 1 !important;
 
-                background: rgba(255,255,255,0.18) !important;
+                background: rgba(255,255,255,.18) !important;
 
-                transform: scale(1.05) !important;
+                transform: scale(1.06) !important;
+
+                box-shadow:
+                    0 2px 12px rgba(0,0,0,.18) !important;
             }
+
+
+            /*
+             * Небольшая подсветка при наведении мышью
+             */
 
             .prisma-head-v2:hover {
+                color: #ffffff !important;
+
                 opacity: 1 !important;
+
+                background: rgba(255,255,255,.12) !important;
             }
+
+
+            /*
+             * На маленьком экране немного уменьшаем
+             */
+
+            @media (max-width: 1100px) {
+
+                .prisma-head-v2-wrap {
+                    gap: 2px !important;
+                }
+
+                .prisma-head-v2 {
+                    padding-left: 11px !important;
+                    padding-right: 11px !important;
+                    font-size: 15px !important;
+                }
+            }
+
+
+            /*
+             * На больших телевизорах
+             */
+
+            @media (min-width: 1600px) {
+
+                .prisma-head-v2 {
+                    padding-left: 22px !important;
+                    padding-right: 22px !important;
+
+                    font-size: 19px !important;
+                }
+
+                .prisma-head-v2-wrap {
+                    gap: 8px !important;
+                }
+            }
+
         `;
 
         document.head.appendChild(style);
@@ -96,9 +181,9 @@
 
 
     /*
-     * ---------------------------------------------------------
-     * УВЕДОМЛЕНИЕ ОБ ОШИБКАХ
-     * ---------------------------------------------------------
+     * =========================================================
+     * УВЕДОМЛЕНИЕ
+     * =========================================================
      */
 
     function notify(text) {
@@ -119,34 +204,32 @@
 
 
     /*
-     * ---------------------------------------------------------
-     * ПОИСК ШТАТНОГО ПУНКТА LAMPA
-     * ---------------------------------------------------------
+     * =========================================================
+     * ИЩЕМ НАСТОЯЩИЕ ПУНКТЫ МЕНЮ LAMPA
+     * =========================================================
      */
 
     function findMenuItem(action) {
 
         try {
 
-            var selector =
+            return document.querySelector(
                 '.menu__item[data-action="' +
                 action +
-                '"]';
-
-            return document.querySelector(selector);
+                '"]'
+            );
 
         } catch (e) {
 
             return null;
-
         }
     }
 
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * ЗАПУСК ШТАТНОГО ПУНКТА LAMPA
-     * ---------------------------------------------------------
+     * =========================================================
      */
 
     function activateMenuItem(element) {
@@ -170,24 +253,25 @@
 
         } catch (e) {}
 
+
         try {
 
-            var event = new CustomEvent(
-                'hover:enter',
-                {
-                    bubbles: true,
-                    cancelable: true
-                }
+            element.dispatchEvent(
+                new CustomEvent(
+                    'hover:enter',
+                    {
+                        bubbles: true,
+                        cancelable: true
+                    }
+                )
             );
-
-            element.dispatchEvent(event);
 
             return true;
 
         } catch (e) {
 
             notify(
-                'Ошибка запуска: ' +
+                'Ошибка: ' +
                 e.message
             );
 
@@ -197,9 +281,9 @@
 
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * ИСТОРИЯ
-     * ---------------------------------------------------------
+     * =========================================================
      */
 
     function openHistory() {
@@ -238,7 +322,6 @@
                     'История: ' +
                     e.message
                 );
-
             }
 
         }, 250);
@@ -246,14 +329,17 @@
 
 
     /*
-     * ---------------------------------------------------------
-     * ПЕРЕХОДЫ
-     * ---------------------------------------------------------
+     * =========================================================
+     * ВЫПОЛНЕНИЕ ДЕЙСТВИЯ
+     * =========================================================
      */
 
     function execute(action) {
 
-        // История — проверенный рабочий маршрут
+        /*
+         * История
+         */
+
         if (action === 'history') {
 
             openHistory();
@@ -262,8 +348,10 @@
         }
 
 
-        // Для остальных используем
-        // настоящий штатный пункт меню Lampa
+        /*
+         * Остальные разделы —
+         * через настоящее меню Lampa.
+         */
 
         var item = findMenuItem(action);
 
@@ -276,8 +364,8 @@
 
 
         /*
-         * Если меню ещё не создано,
-         * немного ждём и пробуем ещё раз.
+         * Если меню ещё не создано —
+         * ждём.
          */
 
         setTimeout(function () {
@@ -291,10 +379,9 @@
             } else {
 
                 notify(
-                    'Не найден пункт Lampa: ' +
+                    'Не найден раздел: ' +
                     action
                 );
-
             }
 
         }, 300);
@@ -302,9 +389,9 @@
 
 
     /*
-     * ---------------------------------------------------------
-     * СОЗДАНИЕ НАШЕГО ПУНКТА
-     * ---------------------------------------------------------
+     * =========================================================
+     * СОЗДАНИЕ КНОПКИ
+     * =========================================================
      */
 
     function createItem(item) {
@@ -331,7 +418,17 @@
 
 
         /*
-         * OK / Enter
+         * Сохраняем действие
+         */
+
+        element.attr(
+            'data-prisma-action',
+            item.action
+        );
+
+
+        /*
+         * OK на пульте
          */
 
         element.on(
@@ -345,8 +442,7 @@
 
 
         /*
-         * Дополнительная защита
-         * для обычного клика мышью
+         * Клик мышью
          */
 
         element.on(
@@ -359,37 +455,14 @@
         );
 
 
-        /*
-         * Кладём ссылку на действие
-         */
-
-        element.attr(
-            'data-prisma-action',
-            item.action
-        );
-
-
         return element;
     }
 
 
     /*
-     * ---------------------------------------------------------
-     * УСТАНОВКА В НАСТОЯЩИЙ LAMPA HEAD
-     * ---------------------------------------------------------
-     *
-     * ВАЖНО:
-     *
-     * Мы НЕ используем:
-     *
-     * Lampa.Head.addElement()
-     *
-     * потому что в твоей сборке этот метод
-     * вызывается раньше готовности html.
-     *
-     * Вместо этого берём уже существующий
-     * DOM через Lampa.Head.render().
-     *
+     * =========================================================
+     * УСТАНОВКА
+     * =========================================================
      */
 
     function install() {
@@ -404,12 +477,11 @@
             !Lampa.Head ||
             !Lampa.Head.render
         ) {
-
             return false;
         }
 
 
-        var head = null;
+        var head;
 
         try {
 
@@ -426,7 +498,7 @@
         }
 
 
-        var actions = null;
+        var actions;
 
         try {
 
@@ -444,19 +516,18 @@
             !actions ||
             !actions.length
         ) {
-
             return false;
         }
 
 
         /*
-         * Уже установлено?
+         * Уже существует?
          */
 
         if (
-            actions.find(
-                '.prisma-head-v2'
-            ).length
+            document.querySelector(
+                '.prisma-head-v2-wrap'
+            )
         ) {
 
             installed = true;
@@ -469,33 +540,65 @@
 
 
         /*
-         * Добавляем справа налево,
-         * чтобы итоговый порядок был:
-         *
-         * ГЛАВНОЕ
-         * ИСТОРИЯ
-         * ФИЛЬМЫ
-         * СЕРИАЛЫ
-         * МУЛЬТФИЛЬМЫ
+         * =====================================================
+         * СОЗДАЁМ ОТДЕЛЬНЫЙ КОНТЕЙНЕР
+         * =====================================================
+         */
+
+        var wrap = document.createElement('div');
+
+        wrap.className =
+            'prisma-head-v2-wrap';
+
+
+        /*
+         * Добавляем кнопки
          */
 
         for (
-            var i = ITEMS.length - 1;
-            i >= 0;
-            i--
+            var i = 0;
+            i < ITEMS.length;
+            i++
         ) {
 
-            var item = ITEMS[i];
-
             var element =
-                createItem(item);
+                createItem(ITEMS[i]);
+
 
             if (!element) {
                 continue;
             }
 
 
-            actions.prepend(element);
+            /*
+             * jQuery объект превращаем в DOM
+             */
+
+            try {
+
+                wrap.appendChild(
+                    element[0]
+                );
+
+            } catch (e) {}
+
+        }
+
+
+        /*
+         * Вставляем контейнер в настоящий Head.
+         *
+         * Сам контейнер НЕ является selector.
+         * Selector являются только пять кнопок.
+         */
+
+        try {
+
+            actions[0].appendChild(wrap);
+
+        } catch (e) {
+
+            return false;
         }
 
 
@@ -507,9 +610,9 @@
 
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * ЖДЁМ ГОТОВНОСТИ LAMPA
-     * ---------------------------------------------------------
+     * =========================================================
      */
 
     var attempts = 0;
@@ -527,14 +630,9 @@
             }
 
 
-            /*
-             * Максимум 30 секунд
-             */
-
             if (attempts >= 150) {
 
                 clearInterval(timer);
-
             }
 
         },
@@ -543,12 +641,7 @@
 
 
     /*
-     * ---------------------------------------------------------
-     * ЕСЛИ LAMPA ПЕРЕРИСОВАЛА HEAD
-     * ---------------------------------------------------------
-     *
-     * Иногда Lampa пересоздаёт header.
-     * Поэтому через несколько секунд проверяем ещё раз.
+     * Дополнительные проверки
      */
 
     setTimeout(
