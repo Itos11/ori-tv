@@ -23,6 +23,12 @@
     var selected = 0;
     var visible = false;
 
+    /*
+     * После перехода в раздел не даём
+     * нашей шторке сразу появиться снова.
+     */
+    var suppressHead = false;
+
     var box = null;
     var buttons = [];
 
@@ -207,15 +213,22 @@
     }
 
     /*
-     * Находим настоящий пункт штатного
-     * меню Lampa.
+     * Ищем настоящий пункт меню Lampa.
      */
     function findOfficialItem(action) {
 
         var selectors = [
-            '.menu__item[data-action="' + action + '"]',
-            '.menu__item.selector[data-action="' + action + '"]',
-            '[data-action="' + action + '"]'
+            '.menu__item[data-action="' +
+            action +
+            '"]',
+
+            '.menu__item.selector[data-action="' +
+            action +
+            '"]',
+
+            '[data-action="' +
+            action +
+            '"]'
         ];
 
         for (
@@ -232,7 +245,6 @@
                     );
 
                 if (element) {
-
                     return element;
                 }
 
@@ -243,12 +255,107 @@
     }
 
     /*
-     * Выполняем именно штатный hover:enter.
-     *
-     * Никакого Router.call()
-     * Никакого Controller.toggle()
-     * Никакого collectionFocus()
-     * Никакого Controller.enter()
+     * Отправляем штатное событие Lampa.
+     */
+    function triggerHoverEnter(element) {
+
+        try {
+
+            if (
+                window.jQuery &&
+                window.jQuery.fn &&
+                window.jQuery.fn.trigger
+            ) {
+
+                window.jQuery(
+                    element
+                ).trigger(
+                    'hover:enter'
+                );
+
+                return true;
+            }
+
+        } catch (e) {}
+
+        try {
+
+            var event =
+                new CustomEvent(
+                    'hover:enter',
+                    {
+                        bubbles: true,
+                        cancelable: true
+                    }
+                );
+
+            element.dispatchEvent(
+                event
+            );
+
+            return true;
+
+        } catch (e) {
+
+            notify(
+                'EVENT: ' +
+                e.message
+            );
+        }
+
+        return false;
+    }
+
+    /*
+     * После открытия категории
+     * возвращаем фокус наверх.
+     */
+    function restoreTopFocus() {
+
+        /*
+         * Не позволяем checkHead()
+         * снова открыть Prisma-шторку.
+         */
+        suppressHead = true;
+
+        setTimeout(
+            function () {
+
+                try {
+
+                    /*
+                     * Переключаем Lampa обратно
+                     * на верхний контроллер.
+                     *
+                     * Это оставляет страницу категории
+                     * открытой, но фокус находится сверху.
+                     */
+                    Lampa.Controller.toggle(
+                        'head'
+                    );
+
+                } catch (e) {}
+
+            },
+            500
+        );
+
+        /*
+         * Через некоторое время снова
+         * разрешаем открытие нашей шторки.
+         */
+        setTimeout(
+            function () {
+
+                suppressHead = false;
+
+            },
+            1200
+        );
+    }
+
+    /*
+     * Выполняем настоящий пункт Lampa.
      */
     function executeOfficialAction(action) {
 
@@ -258,20 +365,32 @@
                 findOfficialItem(action);
 
             /*
-             * Если меню уже существует —
-             * используем его сразу.
+             * Если пункт уже существует —
+             * сразу выполняем его.
              */
             if (item) {
 
                 triggerHoverEnter(item);
+
+                /*
+                 * После перехода даём Lampa
+                 * построить страницу.
+                 */
+                if (
+                    action === 'movie' ||
+                    action === 'tv' ||
+                    action === 'cartoon'
+                ) {
+
+                    restoreTopFocus();
+                }
 
                 return;
             }
 
             /*
              * Если штатного меню сейчас нет,
-             * открываем его и после отрисовки
-             * ищем пункт повторно.
+             * создаём его.
              */
             try {
 
@@ -307,6 +426,15 @@
                         realItem
                     );
 
+                    if (
+                        action === 'movie' ||
+                        action === 'tv' ||
+                        action === 'cartoon'
+                    ) {
+
+                        restoreTopFocus();
+                    }
+
                 },
                 150
             );
@@ -321,65 +449,8 @@
     }
 
     /*
-     * Настоящее событие Lampa.
-     */
-    function triggerHoverEnter(element) {
-
-        /*
-         * В Lampa используется jQuery.
-         */
-        try {
-
-            if (
-                window.jQuery &&
-                window.jQuery.fn &&
-                window.jQuery.fn.trigger
-            ) {
-
-                window.jQuery(
-                    element
-                ).trigger(
-                    'hover:enter'
-                );
-
-                return;
-            }
-
-        } catch (e) {}
-
-        /*
-         * Запасной вариант без jQuery.
-         */
-        try {
-
-            var event =
-                new CustomEvent(
-                    'hover:enter',
-                    {
-                        bubbles: true,
-                        cancelable: true
-                    }
-                );
-
-            element.dispatchEvent(
-                event
-            );
-
-            return;
-
-        } catch (e) {
-
-            notify(
-                'EVENT: ' +
-                e.message
-            );
-        }
-    }
-
-    /*
-     * ИСТОРИЯ
-     *
-     * Не меняем рабочий вариант.
+     * История.
+     * Ничего здесь не меняем.
      */
     function openHistory() {
 
@@ -429,7 +500,7 @@
     }
 
     /*
-     * OK
+     * OK.
      */
     function ok() {
 
@@ -455,7 +526,7 @@
     }
 
     /*
-     * Текущий Controller.
+     * Текущий контроллер.
      */
     function controllerName() {
 
@@ -475,12 +546,10 @@
             if (!controller) return '';
 
             if (controller.name) {
-
                 return controller.name;
             }
 
             if (controller._name) {
-
                 return controller._name;
             }
 
@@ -490,7 +559,7 @@
     }
 
     /*
-     * Показываем шторку только наверху.
+     * Контролируем верх.
      */
     function checkHead() {
 
@@ -501,19 +570,27 @@
             name === 'head'
         ) {
 
+            /*
+             * После перехода в категорию
+             * не открываем нашу шторку
+             * автоматически.
+             */
+            if (suppressHead) {
+                return;
+            }
+
             openNav();
 
         } else {
 
             if (visible) {
-
                 closeNav();
             }
         }
     }
 
     /*
-     * КЛАВИАТУРА
+     * КЛАВИАТУРА.
      */
     document.addEventListener(
         'keydown',
@@ -600,7 +677,7 @@
     );
 
     /*
-     * START
+     * START.
      */
     create();
 
