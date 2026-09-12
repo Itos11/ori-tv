@@ -2,6 +2,9 @@
     'use strict';
 
     if (!window.Lampa) return;
+    if (window.LampaTopNavigationV2) return;
+
+    window.LampaTopNavigationV2 = true;
 
     var items = [
         'ГЛАВНОЕ',
@@ -12,14 +15,17 @@
     ];
 
     var current = 0;
+    var opened = true;
+    var nav = null;
 
-    function start() {
+    function createStyle() {
 
-        if ($('#my-top-navigation').length) return;
+        if ($('#ltn2-style').length) return;
 
-        var style =
-            '<style>' +
-            '#my-top-navigation {' +
+        $('head').append(
+            '<style id="ltn2-style">' +
+
+            '.ltn2{' +
                 'position:fixed;' +
                 'top:0;' +
                 'left:0;' +
@@ -29,55 +35,97 @@
                 'display:flex;' +
                 'align-items:center;' +
                 'justify-content:center;' +
-                'background:rgba(15,15,15,.96);' +
-                'font-family:Arial,sans-serif;' +
+                'background:rgba(12,12,12,.93);' +
+                'backdrop-filter:blur(10px);' +
+                'padding:0 20px;' +
+                'box-sizing:border-box;' +
             '}' +
 
-            '#my-top-navigation .nav-item {' +
-                'padding:14px 22px;' +
-                'margin:0 4px;' +
-                'border-radius:8px;' +
-                'font-size:18px;' +
-                'color:rgba(255,255,255,.65);' +
+            '.ltn2.hidden{' +
+                'transform:translateY(-100%);' +
+            '}' +
+
+            '.ltn2-item{' +
                 'position:relative;' +
+                'height:46px;' +
+                'padding:0 22px;' +
+                'margin:0 3px;' +
+                'display:flex;' +
+                'align-items:center;' +
+                'justify-content:center;' +
+                'border-radius:8px;' +
+                'color:rgba(255,255,255,.62);' +
+                'font-size:17px;' +
+                'font-weight:600;' +
+                'box-sizing:border-box;' +
+                'white-space:nowrap;' +
             '}' +
 
-            '#my-top-navigation .nav-item.selected {' +
+            '.ltn2-item.focus{' +
                 'color:#fff;' +
-                'background:rgba(255,255,255,.15);' +
+                'background:rgba(255,255,255,.18);' +
+                'transform:scale(1.04);' +
             '}' +
 
-            '#my-top-navigation .nav-item.selected:after {' +
+            '.ltn2-item.focus:after{' +
                 'content:"";' +
                 'position:absolute;' +
-                'left:20px;' +
-                'right:20px;' +
-                'bottom:3px;' +
+                'left:22px;' +
+                'right:22px;' +
+                'bottom:2px;' +
                 'height:3px;' +
-                'background:#fff;' +
                 'border-radius:3px;' +
+                'background:#fff;' +
             '}' +
 
-            '</style>';
+            '</style>'
+        );
+    }
 
-        $('head').append(style);
+    function create() {
 
-        var nav = $('<div id="my-top-navigation"></div>');
+        var i;
+        var item;
 
-        for (var i = 0; i < items.length; i++) {
+        if (nav) return;
 
-            var item = $(
-                '<div class="nav-item">' +
+        nav = $('<div class="ltn2"></div>');
+
+        for (i = 0; i < items.length; i++) {
+
+            item = $(
+                '<div class="ltn2-item selector">' +
                 items[i] +
                 '</div>'
             );
 
             (function (index) {
 
+                item.on('hover:focus', function () {
+
+                    current = index;
+
+                    render();
+
+                });
+
+                item.on('hover:enter', function () {
+
+                    current = index;
+
+                    render();
+
+                    select();
+
+                });
+
                 item.on('click', function () {
 
                     current = index;
+
                     render();
+
+                    select();
 
                 });
 
@@ -89,18 +137,216 @@
         $('body').append(nav);
 
         render();
-
-        if (Lampa.Noty) {
-            Lampa.Noty.show('ВЕРХНЕЕ МЕНЮ ЗАГРУЖЕНО');
-        }
     }
 
     function render() {
 
-        $('#my-top-navigation .nav-item')
-            .removeClass('selected')
-            .eq(current)
-            .addClass('selected');
+        if (!nav) return;
+
+        nav.find('.ltn2-item').each(function (index) {
+
+            if (
+                opened &&
+                index === current
+            ) {
+
+                $(this).addClass('focus');
+
+            } else {
+
+                $(this).removeClass('focus');
+
+            }
+
+        });
+    }
+
+    function show() {
+
+        create();
+
+        nav.removeClass('hidden');
+
+        opened = true;
+
+        render();
+
+    }
+
+    function hide() {
+
+        if (!nav) return;
+
+        nav.addClass('hidden');
+
+        opened = false;
+
+        render();
+
+    }
+
+    function select() {
+
+        var title = items[current];
+
+        /*
+         * Пока тестируем навигацию.
+         * После проверки подключим реальные разделы Lampa.
+         */
+
+        if (Lampa.Noty) {
+
+            Lampa.Noty.show(
+                'Выбрано: ' + title
+            );
+
+        }
+
+        console.log(
+            '[TopNavigation] ' +
+            title
+        );
+
+    }
+
+    function keyboard() {
+
+        document.addEventListener(
+            'keydown',
+            function (event) {
+
+                var code = event.keyCode;
+
+                /*
+                 * Если шторка закрыта,
+                 * UP её открывает.
+                 */
+
+                if (!opened) {
+
+                    if (code === 38) {
+
+                        event.preventDefault();
+
+                        show();
+
+                    }
+
+                    return;
+                }
+
+                /*
+                 * LEFT
+                 */
+
+                if (code === 37) {
+
+                    event.preventDefault();
+
+                    current--;
+
+                    if (current < 0) {
+
+                        current =
+                            items.length - 1;
+
+                    }
+
+                    render();
+
+                    return;
+                }
+
+                /*
+                 * RIGHT
+                 */
+
+                if (code === 39) {
+
+                    event.preventDefault();
+
+                    current++;
+
+                    if (
+                        current >=
+                        items.length
+                    ) {
+
+                        current = 0;
+
+                    }
+
+                    render();
+
+                    return;
+                }
+
+                /*
+                 * OK
+                 */
+
+                if (
+                    code === 13 ||
+                    code === 23
+                ) {
+
+                    event.preventDefault();
+
+                    select();
+
+                    return;
+                }
+
+                /*
+                 * DOWN
+                 */
+
+                if (code === 40) {
+
+                    event.preventDefault();
+
+                    hide();
+
+                    return;
+                }
+
+                /*
+                 * BACK
+                 */
+
+                if (
+                    code === 27 ||
+                    code === 4 ||
+                    code === 461
+                ) {
+
+                    event.preventDefault();
+
+                    hide();
+
+                }
+
+            },
+            true
+        );
+
+    }
+
+    function start() {
+
+        createStyle();
+
+        create();
+
+        keyboard();
+
+        if (Lampa.Noty) {
+
+            Lampa.Noty.show(
+                'Навигация готова'
+            );
+
+        }
 
     }
 
@@ -108,19 +354,29 @@
 
         start();
 
-    } else if (Lampa.Listener) {
+    } else if (
+        Lampa.Listener &&
+        Lampa.Listener.follow
+    ) {
 
-        Lampa.Listener.follow('app', function (event) {
+        Lampa.Listener.follow(
+            'app',
+            function (event) {
 
-            if (event.type === 'ready') {
+                if (
+                    event.type ===
+                    'ready'
+                ) {
 
-                setTimeout(function () {
-                    start();
-                }, 500);
+                    setTimeout(
+                        start,
+                        500
+                    );
+
+                }
 
             }
-
-        });
+        );
 
     }
 
