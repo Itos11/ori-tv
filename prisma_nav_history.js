@@ -1,4 +1,3 @@
-```javascript
 (function () {
     'use strict';
 
@@ -39,6 +38,9 @@
         } catch (e) {}
     }
 
+    /*
+     * СОЗДАНИЕ ШТОРКИ
+     */
     function create() {
 
         if (box) return;
@@ -71,6 +73,10 @@
         box.style.boxShadow =
             '0 8px 30px rgba(0,0,0,0.45)';
 
+        /*
+         * Шторка сама не получает фокус.
+         * Клавиши обрабатываем документом.
+         */
         box.style.pointerEvents = 'none';
 
         for (
@@ -125,6 +131,9 @@
         draw();
     }
 
+    /*
+     * ОТРИСОВКА
+     */
     function draw() {
 
         if (!box) return;
@@ -209,143 +218,141 @@
     }
 
     /*
-     * Ищем настоящий пункт штатного
-     * меню Lampa.
+     * =========================================================
+     * ШТАТНОЕ МЕНЮ LAMPA
+     * =========================================================
      *
-     * Важно:
-     * мы НЕ вызываем Router.call().
+     * Здесь больше НЕТ собственного Router.call().
+     *
+     * Мы берём настоящий пункт меню Lampa:
+     *
+     * [data-action="main"]
+     * [data-action="movie"]
+     * [data-action="tv"]
+     * [data-action="cartoon"]
+     *
+     * и отправляем ему hover:enter.
+     *
+     * В результате работает оригинальный код menu.js Lampa.
      */
-    function findMenuItem(action) {
 
-        var selectors = [
-            '.menu__item[data-action="' + action + '"]',
-            '[data-action="' + action + '"]'
-        ];
+    function executeOfficialMenu(action) {
 
-        for (
-            var s = 0;
-            s < selectors.length;
-            s++
-        ) {
-
-            try {
-
-                var el =
-                    document.querySelector(
-                        selectors[s]
-                    );
-
-                if (el) return el;
-
-            } catch (e) {}
-        }
-
-        return null;
-    }
-
-    /*
-     * Выполняем настоящий пункт меню Lampa.
-     */
-    function executeMenuAction(action) {
-
-        closeNav();
-
-        /*
-         * Сначала пробуем уже существующий
-         * пункт меню.
-         */
-        var item =
-            findMenuItem(action);
-
-        if (item) {
-
-            try {
-
-                if (
-                    window.jQuery &&
-                    window.jQuery.fn &&
-                    window.jQuery.fn.trigger
-                ) {
-
-                    window.jQuery(item)
-                        .trigger('hover:enter');
-
-                    return true;
-                }
-
-            } catch (e) {}
-
-            try {
-
-                var event =
-                    new CustomEvent(
-                        'hover:enter',
-                        {
-                            bubbles: true
-                        }
-                    );
-
-                item.dispatchEvent(event);
-
-                return true;
-
-            } catch (e) {}
-        }
-
-        /*
-         * Если меню в DOM ещё не создано —
-         * открываем штатное меню Lampa
-         * и ищем пункт ещё раз.
-         */
         try {
 
             if (
-                Lampa.Menu &&
-                Lampa.Menu.open
+                !window.Lampa ||
+                !Lampa.Menu
             ) {
 
-                Lampa.Menu.open();
+                notify(
+                    'Lampa.Menu недоступно'
+                );
+
+                return;
+            }
+
+            var menu = null;
+
+            /*
+             * render() возвращает настоящий
+             * DOM меню Lampa.
+             */
+            try {
+
+                menu =
+                    Lampa.Menu.render();
+
+            } catch (e) {}
+
+            /*
+             * Если render() не дал элемент,
+             * пробуем найти его непосредственно
+             * в DOM.
+             */
+            var item = null;
+
+            if (menu) {
+
+                try {
+
+                    item =
+                        menu.find(
+                            '.menu__item[data-action="' +
+                            action +
+                            '"]'
+                        );
+                } catch (e) {}
+            }
+
+            /*
+             * Запасной поиск.
+             */
+            if (
+                !item ||
+                !item.length
+            ) {
+
+                try {
+
+                    item =
+                        $(
+                            '.menu__item[data-action="' +
+                            action +
+                            '"]'
+                        );
+
+                } catch (e) {}
+            }
+
+            /*
+             * Не нашли — открываем штатное меню,
+             * после чего ищем его ещё раз.
+             */
+            if (
+                !item ||
+                !item.length
+            ) {
+
+                try {
+
+                    Lampa.Menu.open();
+
+                } catch (e) {}
 
                 setTimeout(
                     function () {
 
-                        var menuItem =
-                            findMenuItem(action);
-
-                        if (!menuItem) {
-
-                            notify(
-                                'Не найдено: ' +
-                                action
-                            );
-
-                            return;
-                        }
-
                         try {
 
+                            var realItem =
+                                $(
+                                    '.menu__item[data-action="' +
+                                    action +
+                                    '"]'
+                                );
+
                             if (
-                                window.jQuery &&
-                                window.jQuery.fn
+                                !realItem ||
+                                !realItem.length
                             ) {
 
-                                window.jQuery(
-                                    menuItem
-                                ).trigger(
-                                    'hover:enter'
+                                notify(
+                                    'Не найден пункт: ' +
+                                    action
                                 );
 
-                            } else {
-
-                                menuItem.dispatchEvent(
-                                    new CustomEvent(
-                                        'hover:enter',
-                                        {
-                                            bubbles: true
-                                        }
-                                    )
-                                );
+                                return;
                             }
+
+                            /*
+                             * ВАЖНО:
+                             * именно hover:enter,
+                             * как в штатном menu.js.
+                             */
+                            realItem.trigger(
+                                'hover:enter'
+                            );
 
                         } catch (e) {
 
@@ -356,11 +363,20 @@
                         }
 
                     },
-                    150
+                    100
                 );
 
-                return true;
+                return;
             }
+
+            /*
+             * ВАЖНО:
+             * точно тот же event,
+             * который использует Lampa.
+             */
+            item.trigger(
+                'hover:enter'
+            );
 
         } catch (e) {
 
@@ -369,20 +385,14 @@
                 e.message
             );
         }
-
-        notify(
-            'Пункт не найден: ' +
-            action
-        );
-
-        return false;
     }
 
     /*
-     * ИСТОРИЯ.
+     * =========================================================
+     * ИСТОРИЯ
+     * =========================================================
      *
-     * Этот вариант уже был проверен
-     * и реально открывает историю.
+     * Оставляем проверенный рабочий вариант.
      */
     function openHistory() {
 
@@ -440,12 +450,17 @@
     }
 
     /*
+     * =========================================================
      * OK
+     * =========================================================
      */
     function ok() {
 
         if (!visible) return;
 
+        /*
+         * ИСТОРИЯ
+         */
         if (selected === 1) {
 
             openHistory();
@@ -453,13 +468,19 @@
             return;
         }
 
-        executeMenuAction(
+        /*
+         * Все остальные пункты —
+         * через штатное меню Lampa.
+         */
+        executeOfficialMenu(
             actions[selected]
         );
     }
 
     /*
-     * Проверяем верхний контроллер Lampa.
+     * =========================================================
+     * CONTROLLER
+     * =========================================================
      */
     function controllerName() {
 
@@ -469,6 +490,7 @@
                 !Lampa.Controller ||
                 !Lampa.Controller.enabled
             ) {
+
                 return '';
             }
 
@@ -478,10 +500,12 @@
             if (!controller) return '';
 
             if (controller.name) {
+
                 return controller.name;
             }
 
             if (controller._name) {
+
                 return controller._name;
             }
 
@@ -490,5 +514,131 @@
         return '';
     }
 
-    function checkHead(
-```
+    function checkHead() {
+
+        var name =
+            controllerName();
+
+        if (name === 'head') {
+
+            openNav();
+
+        } else {
+
+            if (visible) {
+
+                closeNav();
+            }
+        }
+    }
+
+    /*
+     * =========================================================
+     * КЛАВИАТУРА
+     * =========================================================
+     */
+    document.addEventListener(
+        'keydown',
+        function (event) {
+
+            /*
+             * Если шторка закрыта —
+             * вообще не вмешиваемся в Lampa.
+             */
+            if (!visible) return;
+
+            var code =
+                event.keyCode;
+
+            /*
+             * LEFT
+             */
+            if (code === 37) {
+
+                left();
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                return;
+            }
+
+            /*
+             * RIGHT
+             */
+            if (code === 39) {
+
+                right();
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                return;
+            }
+
+            /*
+             * OK
+             */
+            if (code === 13) {
+
+                ok();
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                return;
+            }
+
+            /*
+             * DOWN
+             */
+            if (code === 40) {
+
+                closeNav();
+
+                try {
+
+                    Lampa.Controller.toggle(
+                        'content'
+                    );
+
+                } catch (e) {}
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                return;
+            }
+
+            /*
+             * UP
+             */
+            if (code === 38) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                return;
+            }
+
+        },
+        true
+    );
+
+    /*
+     * =========================================================
+     * START
+     * =========================================================
+     */
+    create();
+
+    setInterval(
+        checkHead,
+        100
+    );
+
+    notify(
+        'PRISMA NAV ГОТОВ'
+    );
+
+})();
