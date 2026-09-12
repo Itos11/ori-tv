@@ -2,94 +2,87 @@
     'use strict';
 
     if (!window.Lampa) return;
-    if (window.__LAMPA_TOP_NAV__) return;
+    if (window.LampaTopNavigation) return;
 
-    window.__LAMPA_TOP_NAV__ = true;
+    window.LampaTopNavigation = true;
 
-    var ITEMS = [
+    var items = [
         {
-            id: 'home',
             title: 'ГЛАВНОЕ',
-            keywords: ['главное', 'главная', 'home']
+            words: ['главн', 'home']
         },
         {
-            id: 'history',
             title: 'ИСТОРИЯ',
-            keywords: ['история', 'history']
+            words: ['истори', 'history']
         },
         {
-            id: 'movie',
             title: 'ФИЛЬМЫ',
-            keywords: ['фильмы', 'фильмы', 'movie']
+            words: ['фильм', 'movie']
         },
         {
-            id: 'serial',
             title: 'СЕРИАЛЫ',
-            keywords: ['сериалы', 'сериал', 'series', 'tv']
+            words: ['сериал', 'series', 'tv']
         },
         {
-            id: 'cartoon',
             title: 'МУЛЬТФИЛЬМЫ',
-            keywords: ['мультфильмы', 'мультфильм', 'мульт', 'анимация', 'cartoon']
+            words: ['мульт', 'анимац', 'cartoon']
         }
     ];
 
     var nav = null;
     var current = 0;
-    var opened = false;
+    var opened = true;
 
     function addStyle() {
-        if ($('#lampa-top-navigation-style').length) return;
+
+        if ($('#lampa-top-nav-style').length) return;
 
         $('head').append(
-            '<style id="lampa-top-navigation-style">' +
+            '<style id="lampa-top-nav-style">' +
 
-            '.ltn {' +
+            '.ltn-bar{' +
                 'position:fixed;' +
                 'top:0;' +
                 'left:0;' +
                 'right:0;' +
-                'height:74px;' +
-                'z-index:999999;' +
+                'height:72px;' +
+                'z-index:99990;' +
                 'display:flex;' +
                 'align-items:center;' +
                 'justify-content:center;' +
-                'padding:0 30px;' +
-                'gap:5px;' +
+                'gap:4px;' +
+                'padding:0 25px;' +
                 'box-sizing:border-box;' +
-                'background:rgba(10,10,10,.97);' +
-                'box-shadow:0 4px 20px rgba(0,0,0,.35);' +
-                'font-family:Arial,sans-serif;' +
-                'transition:transform .2s ease,opacity .2s ease;' +
+                'background:rgba(15,15,15,.97);' +
+                'box-shadow:0 4px 18px rgba(0,0,0,.35);' +
             '}' +
 
-            '.ltn.ltn-hide {' +
-                'transform:translateY(-100%);' +
-                'opacity:0;' +
-                'pointer-events:none;' +
+            '.ltn-bar.ltn-hide{' +
+                'display:none;' +
             '}' +
 
-            '.ltn-item {' +
+            '.ltn-item{' +
                 'position:relative;' +
-                'height:48px;' +
+                'height:46px;' +
+                'padding:0 20px;' +
                 'display:flex;' +
                 'align-items:center;' +
                 'justify-content:center;' +
-                'padding:0 20px;' +
-                'border-radius:8px;' +
                 'box-sizing:border-box;' +
+                'border-radius:8px;' +
                 'color:rgba(255,255,255,.65);' +
                 'font-size:17px;' +
                 'font-weight:600;' +
                 'white-space:nowrap;' +
-                'transition:background .12s ease,color .12s ease,transform .12s ease;' +
+                'cursor:pointer;' +
             '}' +
 
-            '.ltn-item.ltn-selected {' +
+            '.ltn-item.ltn-current{' +
                 'color:#fff;' +
+                'background:rgba(255,255,255,.13);' +
             '}' +
 
-            '.ltn-item.ltn-selected:after {' +
+            '.ltn-item.ltn-current:after{' +
                 'content:"";' +
                 'position:absolute;' +
                 'left:20px;' +
@@ -100,91 +93,123 @@
                 'background:#fff;' +
             '}' +
 
-            '.ltn-item.ltn-focus {' +
-                'color:#fff;' +
-                'background:rgba(255,255,255,.16);' +
-                'transform:scale(1.04);' +
-            '}' +
+            '@media screen and (max-width:900px){' +
 
-            '@media screen and (max-width:1000px) {' +
-                '.ltn {' +
-                    'padding:0 8px;' +
-                    'gap:1px;' +
+                '.ltn-bar{' +
+                    'padding:0 5px;' +
+                    'gap:0;' +
                 '}' +
 
-                '.ltn-item {' +
-                    'padding:0 10px;' +
+                '.ltn-item{' +
+                    'padding:0 9px;' +
                     'font-size:13px;' +
                 '}' +
 
-                '.ltn-item.ltn-selected:after {' +
-                    'left:10px;' +
-                    'right:10px;' +
+                '.ltn-item.ltn-current:after{' +
+                    'left:9px;' +
+                    'right:9px;' +
                 '}' +
+
             '}' +
 
             '</style>'
         );
     }
 
+    function render() {
+
+        if (!nav) return;
+
+        nav.find('.ltn-item').each(function (index) {
+
+            if (index === current) {
+                $(this).addClass('ltn-current');
+            } else {
+                $(this).removeClass('ltn-current');
+            }
+
+        });
+    }
+
     function create() {
+
+        var i;
+        var button;
+
         if (nav) return;
 
-        nav = $('<div class="ltn"></div>');
+        nav = $('<div class="ltn-bar"></div>');
 
-        ITEMS.forEach(function (item, index) {
+        for (i = 0; i < items.length; i++) {
 
-            var button = $(
+            button = $(
                 '<div class="ltn-item selector">' +
-                item.title +
+                items[i].title +
                 '</div>'
             );
 
-            button.on('hover:focus', function () {
-                current = index;
-                render();
-            });
+            button.attr(
+                'data-ltn-index',
+                i
+            );
 
-            button.on('hover:enter', function () {
-                current = index;
-                openItem(item);
-            });
+            (function (index) {
 
-            button.on('click', function () {
-                current = index;
-                openItem(item);
-            });
+                button.on(
+                    'hover:focus',
+                    function () {
+
+                        current = index;
+
+                        render();
+                    }
+                );
+
+                button.on(
+                    'hover:enter',
+                    function () {
+
+                        current = index;
+
+                        render();
+
+                        openSection(
+                            items[index]
+                        );
+                    }
+                );
+
+                button.on(
+                    'click',
+                    function () {
+
+                        current = index;
+
+                        render();
+
+                        openSection(
+                            items[index]
+                        );
+                    }
+                );
+
+            })(i);
 
             nav.append(button);
-        });
+        }
 
         $('body').append(nav);
 
         render();
     }
 
-    function render() {
-        if (!nav) return;
-
-        nav.find('.ltn-item').each(function (index) {
-
-            $(this).toggleClass(
-                'ltn-selected',
-                index === current
-            );
-
-            $(this).toggleClass(
-                'ltn-focus',
-                opened && index === current
-            );
-
-        });
-    }
-
     function show() {
+
         create();
 
-        nav.removeClass('ltn-hide');
+        nav.removeClass(
+            'ltn-hide'
+        );
 
         opened = true;
 
@@ -192,20 +217,14 @@
     }
 
     function hide() {
+
         if (!nav) return;
 
-        nav.addClass('ltn-hide');
+        nav.addClass(
+            'ltn-hide'
+        );
 
         opened = false;
-
-        render();
-    }
-
-    function getText(element) {
-        return ($(element).text() || '')
-            .replace(/\s+/g, ' ')
-            .trim()
-            .toLowerCase();
     }
 
     function findMenuItem(item) {
@@ -213,106 +232,104 @@
         var result = null;
 
         var elements = $(
-            '.menu__item,' +
-            '.menu .selector,' +
-            '.menu-item,' +
-            '.menu .menu__item'
+            '.menu__item, ' +
+            '.menu .selector, ' +
+            '.menu__item.selector'
         );
 
         elements.each(function () {
 
+            var value;
+            var j;
+
             if (result) return;
 
-            var text = getText(this);
+            value = (
+                $(this).text() || ''
+            ).toLowerCase();
 
-            if (!text) return;
-
-            for (var i = 0; i < item.keywords.length; i++) {
+            for (
+                j = 0;
+                j < item.words.length;
+                j++
+            ) {
 
                 if (
-                    text.indexOf(
-                        item.keywords[i].toLowerCase()
+                    value.indexOf(
+                        item.words[j]
                     ) !== -1
                 ) {
-                    result = this;
+
+                    result = $(this);
+
                     break;
                 }
-
             }
 
         });
 
-        return result ? $(result) : $();
+        if (result) {
+            return result.first();
+        }
+
+        return $();
     }
 
-    function openItem(item) {
+    function openSection(item) {
+
+        var menuItem;
 
         hide();
 
-        var menuItem = findMenuItem(item);
+        menuItem = findMenuItem(item);
 
         if (menuItem.length) {
 
-            setTimeout(function () {
+            setTimeout(
+                function () {
 
-                try {
-                    menuItem.trigger('hover:enter');
-                } catch (e) {
-                    menuItem.click();
-                }
+                    menuItem.trigger(
+                        'hover:enter'
+                    );
 
-            }, 100);
+                },
+                80
+            );
 
-            return;
-        }
-
-        /*
-         * Если пункт не найден,
-         * открываем стандартное меню Lampa.
-         */
-
-        setTimeout(function () {
+        } else {
 
             try {
-                Lampa.Controller.toggle('menu');
+
+                Lampa.Controller.toggle(
+                    'menu'
+                );
+
             } catch (e) {}
 
-        }, 100);
-    }
-
-    function isModalOpen() {
-
-        if ($('.player:visible').length) return true;
-        if ($('.modal:visible').length) return true;
-        if ($('.keyboard:visible').length) return true;
-
-        return false;
+        }
     }
 
     function installKeyboard() {
+
+        if (
+            window.LampaTopNavigationKeyboard
+        ) {
+            return;
+        }
+
+        window.LampaTopNavigationKeyboard = true;
 
         document.addEventListener(
             'keydown',
             function (event) {
 
-                if (isModalOpen()) {
-                    return;
-                }
-
-                var key = event.keyCode;
-
-                /*
-                 * ВВЕРХ — открыть шторку
-                 */
+                var code = event.keyCode;
 
                 if (!opened) {
 
-                    if (key === 38) {
-
-                        event.preventDefault();
+                    if (code === 38) {
 
                         show();
-
                     }
 
                     return;
@@ -322,15 +339,15 @@
                  * ВЛЕВО
                  */
 
-                if (key === 37) {
+                if (code === 37) {
 
                     event.preventDefault();
-                    event.stopPropagation();
 
                     current--;
 
                     if (current < 0) {
-                        current = ITEMS.length - 1;
+                        current =
+                            items.length - 1;
                     }
 
                     render();
@@ -342,14 +359,17 @@
                  * ВПРАВО
                  */
 
-                if (key === 39) {
+                if (code === 39) {
 
                     event.preventDefault();
-                    event.stopPropagation();
 
                     current++;
 
-                    if (current >= ITEMS.length) {
+                    if (
+                        current >=
+                        items.length
+                    ) {
+
                         current = 0;
                     }
 
@@ -362,12 +382,16 @@
                  * OK
                  */
 
-                if (key === 13 || key === 23) {
+                if (
+                    code === 13 ||
+                    code === 23
+                ) {
 
                     event.preventDefault();
-                    event.stopPropagation();
 
-                    openItem(ITEMS[current]);
+                    openSection(
+                        items[current]
+                    );
 
                     return;
                 }
@@ -376,74 +400,41 @@
                  * ВНИЗ
                  */
 
-                if (key === 40) {
+                if (code === 40) {
 
                     event.preventDefault();
-                    event.stopPropagation();
 
                     hide();
+
+                    try {
+
+                        Lampa.Controller.toggle(
+                            'content'
+                        );
+
+                    } catch (e) {}
 
                     return;
                 }
 
                 /*
-                 * BACK
+                 * НАЗАД
                  */
 
                 if (
-                    key === 27 ||
-                    key === 4 ||
-                    key === 461
+                    code === 27 ||
+                    code === 4 ||
+                    code === 461
                 ) {
 
                     event.preventDefault();
-                    event.stopPropagation();
 
                     hide();
-
-                    return;
                 }
 
             },
             true
         );
-    }
-
-    function events() {
-
-        if (!Lampa.Listener) return;
-
-        Lampa.Listener.follow('app', function (event) {
-
-            if (event.type === 'ready') {
-
-                setTimeout(function () {
-
-                    create();
-                    show();
-
-                }, 1200);
-
-            }
-
-        });
-
-        Lampa.Listener.follow('activity', function (event) {
-
-            if (event.type === 'start') {
-
-                setTimeout(function () {
-
-                    if (!isModalOpen()) {
-                        create();
-                    }
-
-                }, 500);
-
-            }
-
-        });
-
     }
 
     function init() {
@@ -454,8 +445,33 @@
 
         installKeyboard();
 
-        events();
+        if (
+            Lampa.Listener &&
+            Lampa.Listener.follow
+        ) {
 
+            Lampa.Listener.follow(
+                'app',
+                function (event) {
+
+                    if (
+                        event.type ===
+                        'ready'
+                    ) {
+
+                        setTimeout(
+                            function () {
+
+                                show();
+
+                            },
+                            500
+                        );
+                    }
+
+                }
+            );
+        }
     }
 
     init();
