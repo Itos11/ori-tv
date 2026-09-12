@@ -31,7 +31,6 @@
         if (box) return;
 
         box = document.createElement('div');
-
         box.id = 'prisma-nav-history';
 
         box.style.position = 'fixed';
@@ -39,29 +38,17 @@
         box.style.left = '0';
         box.style.right = '0';
         box.style.height = '100px';
-
         box.style.zIndex = '999999';
-
         box.style.display = 'none';
         box.style.alignItems = 'center';
         box.style.justifyContent = 'center';
-
         box.style.padding = '0 25px';
         box.style.boxSizing = 'border-box';
-
-        box.style.background =
-            'rgba(10,10,10,0.97)';
-
-        box.style.boxShadow =
-            '0 8px 30px rgba(0,0,0,0.5)';
-
+        box.style.background = 'rgba(10,10,10,0.97)';
+        box.style.boxShadow = '0 8px 30px rgba(0,0,0,0.5)';
         box.style.pointerEvents = 'none';
 
-        for (
-            var i = 0;
-            i < items.length;
-            i++
-        ) {
+        for (var i = 0; i < items.length; i++) {
 
             var button =
                 document.createElement('div');
@@ -102,7 +89,6 @@
                 'nowrap';
 
             box.appendChild(button);
-
             buttons.push(button);
         }
 
@@ -195,8 +181,11 @@
     }
 
     /*
-     * ТОЛЬКО ИСТОРИЯ
-     * Этот переход у нас уже работает.
+     * =========================
+     * ИСТОРИЯ
+     * =========================
+     *
+     * ЭТОТ КОД НЕ МЕНЯЕМ.
      */
 
     function openHistory() {
@@ -218,36 +207,20 @@
 
                     try {
 
-                        if (
-                            Lampa.Router &&
-                            Lampa.Router.call
-                        ) {
-
-                            Lampa.Router.call(
-                                'favorite',
-                                {
-                                    url: '',
-                                    title:
-                                        'История просмотров',
-
-                                    component:
-                                        'favorite',
-
-                                    type:
-                                        'history',
-
-                                    page: 1,
-
-                                    filter: ''
-                                }
-                            );
-
-                        } else {
-
-                            notify(
-                                'Router.call НЕ НАЙДЕН'
-                            );
-                        }
+                        Lampa.Router.call(
+                            'favorite',
+                            {
+                                url: '',
+                                title:
+                                    'История просмотров',
+                                component:
+                                    'favorite',
+                                type:
+                                    'history',
+                                page: 1,
+                                filter: ''
+                            }
+                        );
 
                     } catch (e) {
 
@@ -271,7 +244,37 @@
     }
 
     /*
+     * =========================
+     * ФИЛЬМЫ
+     * =========================
+     */
+
+    function openMovies() {
+
+        closeNav();
+
+        try {
+
+            Lampa.Router.call(
+                'category',
+                {
+                    url: 'movie'
+                }
+            );
+
+        } catch (e) {
+
+            notify(
+                'ФИЛЬМЫ: ' +
+                e.message
+            );
+        }
+    }
+
+    /*
+     * =========================
      * OK
+     * =========================
      */
 
     function ok() {
@@ -281,6 +284,7 @@
         /*
          * ИСТОРИЯ
          */
+
         if (selected === 1) {
 
             openHistory();
@@ -289,8 +293,19 @@
         }
 
         /*
+         * ФИЛЬМЫ
+         */
+
+        if (selected === 2) {
+
+            openMovies();
+
+            return;
+        }
+
+        /*
          * Остальные пока
-         * только показывают выбор.
+         * не трогаем.
          */
 
         notify(
@@ -300,8 +315,9 @@
     }
 
     /*
-     * Узнаём,
-     * находится ли Lampa наверху.
+     * =========================
+     * CONTROLLER
+     * =========================
      */
 
     function controllerName() {
@@ -337,7 +353,9 @@
     }
 
     /*
-     * Открытие шторки
+     * =========================
+     * ОТКРЫТИЕ ШТОРКИ
+     * =========================
      */
 
     function checkHead() {
@@ -359,17 +377,16 @@
     }
 
     /*
-     * Управление пультом
+     * =========================
+     * КЛАВИАТУРА
+     * =========================
      */
 
     document.addEventListener(
         'keydown',
         function (event) {
 
-            if (!visible) {
-
-                return;
-            }
+            if (!visible) return;
 
             var code =
                 event.keyCode;
@@ -455,7 +472,9 @@
     );
 
     /*
-     * Запуск
+     * =========================
+     * START
+     * =========================
      */
 
     create();
@@ -466,7 +485,7 @@
     );
 
     notify(
-        'PRISMA NAV ГОТОВ'
+        'PRISMA NAV MOVIES ГОТОВ'
     );
 
 })();
