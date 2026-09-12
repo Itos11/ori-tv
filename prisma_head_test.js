@@ -26,8 +26,10 @@
     html.style.alignItems = 'center';
     html.style.justifyContent = 'center';
     html.style.background = 'rgba(10,10,10,.97)';
+    html.style.boxSizing = 'border-box';
 
     for (var i = 0; i < items.length; i++) {
+
         var button = document.createElement('div');
 
         button.className = 'selector';
@@ -40,6 +42,8 @@
         button.style.padding = '14px 22px';
         button.style.margin = '0 4px';
         button.style.borderRadius = '8px';
+        button.style.boxSizing = 'border-box';
+        button.style.whiteSpace = 'nowrap';
 
         html.appendChild(button);
         buttons.push(button);
@@ -48,47 +52,89 @@
     document.body.appendChild(html);
 
     function draw() {
+
         for (var i = 0; i < buttons.length; i++) {
+
             if (i === selected) {
+
                 buttons[i].style.background =
                     'rgba(255,255,255,.25)';
+
                 buttons[i].style.transform =
                     'scale(1.08)';
+
+                buttons[i].style.opacity = '1';
+
             } else {
+
                 buttons[i].style.background =
                     'transparent';
+
                 buttons[i].style.transform =
                     'scale(1)';
+
+                buttons[i].style.opacity = '.7';
             }
+        }
+    }
+
+    function showNav() {
+
+        html.style.display = 'flex';
+
+        draw();
+
+        if (Lampa.Noty && Lampa.Noty.show) {
+            Lampa.Noty.show('PRISMA HEAD ACTIVE');
+        }
+    }
+
+    function hideNav() {
+
+        html.style.display = 'none';
+    }
+
+    function selectLeft() {
+
+        if (selected > 0) {
+            selected--;
+            draw();
+        }
+    }
+
+    function selectRight() {
+
+        if (selected < items.length - 1) {
+            selected++;
+            draw();
+        }
+    }
+
+    function selectOK() {
+
+        if (Lampa.Noty && Lampa.Noty.show) {
+            Lampa.Noty.show(
+                'ВЫБРАНО: ' + items[selected]
+            );
         }
     }
 
     Lampa.Controller.add('prisma_head_test', {
 
         toggle: function () {
-            html.style.display = 'flex';
-
-            draw();
-
-            Lampa.Noty.show('PRISMA HEAD ACTIVE');
+            showNav();
         },
 
         gone: function () {
-            html.style.display = 'none';
+            hideNav();
         },
 
         left: function () {
-            if (selected > 0) {
-                selected--;
-                draw();
-            }
+            selectLeft();
         },
 
         right: function () {
-            if (selected < items.length - 1) {
-                selected++;
-                draw();
-            }
+            selectRight();
         },
 
         up: function () {
@@ -96,22 +142,19 @@
         },
 
         down: function () {
-            html.style.display = 'none';
 
-            /*
-             * Возвращаемся в стандартный content.
-             */
+            hideNav();
+
             Lampa.Controller.toggle('content');
         },
 
         ok: function () {
-            Lampa.Noty.show(
-                'ВЫБРАНО: ' + items[selected]
-            );
+            selectOK();
         },
 
         back: function () {
-            html.style.display = 'none';
+
+            hideNav();
 
             Lampa.Controller.toggle('content');
         }
@@ -119,12 +162,12 @@
     });
 
     /*
-     * Для первого теста НЕ переключаем контроллер
-     * автоматически.
-     *
-     * Нам нужно проверить его отдельно.
+     * Включаем наш контроллер сразу после загрузки.
      */
+    Lampa.Controller.toggle('prisma_head_test');
 
-    Lampa.Noty.show('PRISMA HEAD TEST ГОТОВ');
+    if (Lampa.Noty && Lampa.Noty.show) {
+        Lampa.Noty.show('PRISMA HEAD TEST ГОТОВ');
+    }
 
 })();
