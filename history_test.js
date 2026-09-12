@@ -1,9 +1,7 @@
 (function () {
     'use strict';
 
-    if (!window.Lampa) {
-        return;
-    }
+    if (!window.Lampa) return;
 
     function notify(text) {
         if (Lampa.Noty && Lampa.Noty.show) {
@@ -11,44 +9,40 @@
         }
     }
 
-    notify('ПРОВЕРЯЮ ИСТОРИЮ...');
-
     setTimeout(function () {
 
         try {
 
-            // 1. Принудительно перечитываем состояние избранного/истории
+            // Перечитать сохранённые данные
             if (Lampa.Favorite &&
                 Lampa.Favorite.read) {
 
                 Lampa.Favorite.read(true);
+            }
+
+            // Принудительно создать отсутствующие категории
+            if (Lampa.Favorite &&
+                Lampa.Favorite.full) {
+
+                var all = Lampa.Favorite.full();
+
+                var info =
+                    'history=' +
+                    (all.history ?
+                        all.history.length : 'UNDEFINED') +
+                    ' | like=' +
+                    (all.like ?
+                        all.like.length : 'UNDEFINED');
+
+                notify('FAVORITE ГОТОВ: ' + info);
 
             } else {
 
-                notify('Lampa.Favorite.read НЕ НАЙДЕН');
+                notify('Favorite.full НЕ НАЙДЕН');
                 return;
             }
 
-            // 2. Проверяем историю
-            var history = [];
-
-            if (Lampa.Favorite.get) {
-                history = Lampa.Favorite.get({
-                    type: 'history'
-                });
-            }
-
-            if (!history) {
-                history = [];
-            }
-
-            notify(
-                'ИСТОРИЯ НАЙДЕНА: ' +
-                history.length +
-                ' КАРТОЧЕК'
-            );
-
-            // 3. Открываем историю
+            // Теперь открываем
             setTimeout(function () {
 
                 try {
@@ -64,22 +58,19 @@
                 } catch (e) {
 
                     notify(
-                        'ОШИБКА ОТКРЫТИЯ: ' +
-                        e.message
+                        'ОШИБКА: ' + e.message
                     );
                 }
 
-            }, 700);
+            }, 500);
 
         } catch (e) {
 
             notify(
-                'ОШИБКА ИСТОРИИ: ' +
-                e.message
+                'ОШИБКА INIT: ' + e.message
             );
-
         }
 
-    }, 500);
+    }, 1500);
 
 })();
