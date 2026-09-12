@@ -1,3 +1,4 @@
+```javascript
 (function () {
     'use strict';
 
@@ -10,6 +11,14 @@
         'ФИЛЬМЫ',
         'СЕРИАЛЫ',
         'МУЛЬТФИЛЬМЫ'
+    ];
+
+    var actions = [
+        'main',
+        'history',
+        'movie',
+        'tv',
+        'cartoon'
     ];
 
     var selected = 0;
@@ -30,33 +39,19 @@
         } catch (e) {}
     }
 
-    function source() {
-        try {
-            if (
-                Lampa.Storage &&
-                Lampa.Storage.field
-            ) {
-                return (
-                    Lampa.Storage.field('source') ||
-                    'tmdb'
-                );
-            }
-        } catch (e) {}
-
-        return 'tmdb';
-    }
-
     function create() {
 
         if (box) return;
 
         box = document.createElement('div');
+
         box.id = 'prisma-nav-final';
 
         box.style.position = 'fixed';
         box.style.top = '0';
         box.style.left = '0';
         box.style.right = '0';
+
         box.style.height = '92px';
 
         box.style.zIndex = '999999';
@@ -78,7 +73,11 @@
 
         box.style.pointerEvents = 'none';
 
-        for (var i = 0; i < items.length; i++) {
+        for (
+            var i = 0;
+            i < items.length;
+            i++
+        ) {
 
             var button =
                 document.createElement('div');
@@ -210,36 +209,180 @@
     }
 
     /*
-     * ГЛАВНОЕ
+     * Ищем настоящий пункт штатного
+     * меню Lampa.
+     *
+     * Важно:
+     * мы НЕ вызываем Router.call().
      */
-    function openMain() {
+    function findMenuItem(action) {
+
+        var selectors = [
+            '.menu__item[data-action="' + action + '"]',
+            '[data-action="' + action + '"]'
+        ];
+
+        for (
+            var s = 0;
+            s < selectors.length;
+            s++
+        ) {
+
+            try {
+
+                var el =
+                    document.querySelector(
+                        selectors[s]
+                    );
+
+                if (el) return el;
+
+            } catch (e) {}
+        }
+
+        return null;
+    }
+
+    /*
+     * Выполняем настоящий пункт меню Lampa.
+     */
+    function executeMenuAction(action) {
 
         closeNav();
 
+        /*
+         * Сначала пробуем уже существующий
+         * пункт меню.
+         */
+        var item =
+            findMenuItem(action);
+
+        if (item) {
+
+            try {
+
+                if (
+                    window.jQuery &&
+                    window.jQuery.fn &&
+                    window.jQuery.fn.trigger
+                ) {
+
+                    window.jQuery(item)
+                        .trigger('hover:enter');
+
+                    return true;
+                }
+
+            } catch (e) {}
+
+            try {
+
+                var event =
+                    new CustomEvent(
+                        'hover:enter',
+                        {
+                            bubbles: true
+                        }
+                    );
+
+                item.dispatchEvent(event);
+
+                return true;
+
+            } catch (e) {}
+        }
+
+        /*
+         * Если меню в DOM ещё не создано —
+         * открываем штатное меню Lampa
+         * и ищем пункт ещё раз.
+         */
         try {
 
-            Lampa.Router.call(
-                'main',
-                {
-                    title:
-                        'Главное - ' +
-                        String(
-                            source()
-                        ).toUpperCase()
-                }
-            );
+            if (
+                Lampa.Menu &&
+                Lampa.Menu.open
+            ) {
+
+                Lampa.Menu.open();
+
+                setTimeout(
+                    function () {
+
+                        var menuItem =
+                            findMenuItem(action);
+
+                        if (!menuItem) {
+
+                            notify(
+                                'Не найдено: ' +
+                                action
+                            );
+
+                            return;
+                        }
+
+                        try {
+
+                            if (
+                                window.jQuery &&
+                                window.jQuery.fn
+                            ) {
+
+                                window.jQuery(
+                                    menuItem
+                                ).trigger(
+                                    'hover:enter'
+                                );
+
+                            } else {
+
+                                menuItem.dispatchEvent(
+                                    new CustomEvent(
+                                        'hover:enter',
+                                        {
+                                            bubbles: true
+                                        }
+                                    )
+                                );
+                            }
+
+                        } catch (e) {
+
+                            notify(
+                                'MENU: ' +
+                                e.message
+                            );
+                        }
+
+                    },
+                    150
+                );
+
+                return true;
+            }
 
         } catch (e) {
 
             notify(
-                'ГЛАВНОЕ: ' +
+                'MENU: ' +
                 e.message
             );
         }
+
+        notify(
+            'Пункт не найден: ' +
+            action
+        );
+
+        return false;
     }
 
     /*
-     * ИСТОРИЯ
+     * ИСТОРИЯ.
+     *
+     * Этот вариант уже был проверен
+     * и реально открывает историю.
      */
     function openHistory() {
 
@@ -251,6 +394,7 @@
                 Lampa.Favorite &&
                 Lampa.Favorite.read
             ) {
+
                 Lampa.Favorite.read();
             }
 
@@ -296,140 +440,26 @@
     }
 
     /*
-     * ФИЛЬМЫ
-     */
-    function openMovies() {
-
-        closeNav();
-
-        try {
-
-            Lampa.Router.call(
-                'category',
-                {
-                    url: 'movie',
-
-                    title:
-                        'Фильмы - ' +
-                        String(
-                            source()
-                        ).toUpperCase(),
-
-                    source:
-                        source()
-                }
-            );
-
-        } catch (e) {
-
-            notify(
-                'ФИЛЬМЫ: ' +
-                e.message
-            );
-        }
-    }
-
-    /*
-     * СЕРИАЛЫ
-     */
-    function openSeries() {
-
-        closeNav();
-
-        try {
-
-            Lampa.Router.call(
-                'category',
-                {
-                    url: 'tv',
-
-                    title:
-                        'Сериалы - ' +
-                        String(
-                            source()
-                        ).toUpperCase(),
-
-                    source:
-                        source()
-                }
-            );
-
-        } catch (e) {
-
-            notify(
-                'СЕРИАЛЫ: ' +
-                e.message
-            );
-        }
-    }
-
-    /*
-     * МУЛЬТФИЛЬМЫ
-     */
-    function openCartoons() {
-
-        closeNav();
-
-        try {
-
-            Lampa.Router.call(
-                'category',
-                {
-                    url: 'movie',
-
-                    title:
-                        'Мультфильмы - ' +
-                        String(
-                            source()
-                        ).toUpperCase(),
-
-                    genres: 16
-                }
-            );
-
-        } catch (e) {
-
-            notify(
-                'МУЛЬТФИЛЬМЫ: ' +
-                e.message
-            );
-        }
-    }
-
-    /*
      * OK
      */
     function ok() {
 
         if (!visible) return;
 
-        switch (selected) {
+        if (selected === 1) {
 
-            case 0:
-                openMain();
-                break;
+            openHistory();
 
-            case 1:
-                openHistory();
-                break;
-
-            case 2:
-                openMovies();
-                break;
-
-            case 3:
-                openSeries();
-                break;
-
-            case 4:
-                openCartoons();
-                break;
+            return;
         }
+
+        executeMenuAction(
+            actions[selected]
+        );
     }
 
     /*
-     * Определяем, находится ли Lampa
-     * на верхнем контроллере.
+     * Проверяем верхний контроллер Lampa.
      */
     function controllerName() {
 
@@ -460,128 +490,5 @@
         return '';
     }
 
-    function checkHead() {
-
-        var name =
-            controllerName();
-
-        if (name === 'head') {
-
-            openNav();
-
-        } else {
-
-            if (visible) {
-                closeNav();
-            }
-        }
-    }
-
-    /*
-     * КЛАВИАТУРА
-     *
-     * Когда шторка закрыта —
-     * вообще ничего не перехватываем.
-     */
-    document.addEventListener(
-        'keydown',
-        function (event) {
-
-            if (!visible) return;
-
-            var code =
-                event.keyCode;
-
-            /*
-             * LEFT
-             */
-            if (code === 37) {
-
-                left();
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                return;
-            }
-
-            /*
-             * RIGHT
-             */
-            if (code === 39) {
-
-                right();
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                return;
-            }
-
-            /*
-             * OK
-             */
-            if (code === 13) {
-
-                ok();
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                return;
-            }
-
-            /*
-             * DOWN
-             */
-            if (code === 40) {
-
-                closeNav();
-
-                try {
-
-                    Lampa.Controller.toggle(
-                        'content'
-                    );
-
-                } catch (e) {}
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                return;
-            }
-
-            /*
-             * UP
-             *
-             * Пока шторка открыта —
-             * остаёмся в ней.
-             */
-            if (code === 38) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                return;
-            }
-
-        },
-        true
-    );
-
-    /*
-     * START
-     */
-    create();
-
-    setInterval(
-        checkHead,
-        100
-    );
-
-    notify(
-        'PRISMA NAV ГОТОВ'
-    );
-
-})();
+    function checkHead(
+```
