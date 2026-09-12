@@ -1,8 +1,8 @@
 (function () {
     'use strict';
 
-    if (window.TOP_NAV_02) return;
-    window.TOP_NAV_02 = true;
+    if (window.TOP_NAV_03) return;
+    window.TOP_NAV_03 = true;
 
     var items = [
         'ГЛАВНОЕ',
@@ -12,140 +12,110 @@
         'МУЛЬТФИЛЬМЫ'
     ];
 
-    var selected = 0;
-    var visible = true;
-    var box;
+    var box = document.createElement('div');
     var buttons = [];
+    var selected = 0;
 
-    function draw() {
-        if (!box) return;
+    box.style.position = 'fixed';
+    box.style.top = '0';
+    box.style.left = '0';
+    box.style.right = '0';
+    box.style.height = '80px';
+    box.style.background = 'rgba(0,0,0,0.96)';
+    box.style.zIndex = '999999';
+    box.style.display = 'flex';
+    box.style.alignItems = 'center';
+    box.style.justifyContent = 'center';
+
+    for (var i = 0; i < items.length; i++) {
+
+        var button = document.createElement('div');
+
+        button.className = 'selector';
+
+        button.innerHTML = items[i];
+
+        button.style.color = '#ffffff';
+        button.style.fontSize = '20px';
+        button.style.fontWeight = 'bold';
+        button.style.padding = '15px 22px';
+        button.style.margin = '0 5px';
+        button.style.borderRadius = '8px';
+
+        box.appendChild(button);
+        buttons.push(button);
+    }
+
+    document.body.appendChild(box);
+
+    function focusItem(index) {
+
+        if (index < 0) index = 0;
+        if (index >= buttons.length) index = buttons.length - 1;
+
+        selected = index;
 
         for (var i = 0; i < buttons.length; i++) {
-            if (i === selected) {
-                buttons[i].style.background = 'rgba(255,255,255,0.35)';
-                buttons[i].style.transform = 'scale(1.08)';
-            } else {
-                buttons[i].style.background = 'rgba(255,255,255,0.08)';
-                buttons[i].style.transform = 'scale(1)';
-            }
+            buttons[i].classList.remove('focus');
         }
 
-        box.style.display = visible ? 'flex' : 'none';
-    }
+        buttons[selected].classList.add('focus');
 
-    function create() {
-        box = document.createElement('div');
-
-        box.style.position = 'fixed';
-        box.style.top = '0';
-        box.style.left = '0';
-        box.style.right = '0';
-        box.style.height = '80px';
-        box.style.background = 'rgba(0,0,0,0.96)';
-        box.style.zIndex = '999999';
-        box.style.display = 'flex';
-        box.style.alignItems = 'center';
-        box.style.justifyContent = 'center';
-
-        for (var i = 0; i < items.length; i++) {
-            var button = document.createElement('div');
-
-            button.style.color = '#ffffff';
-            button.style.fontSize = '20px';
-            button.style.fontWeight = 'bold';
-            button.style.padding = '15px 22px';
-            button.style.margin = '0 4px';
-            button.style.borderRadius = '8px';
-            button.style.boxSizing = 'border-box';
-
-            button.innerHTML = items[i];
-
-            box.appendChild(button);
-            buttons.push(button);
+        if (Lampa.Controller && Lampa.Controller.collectionFocus) {
+            Lampa.Controller.collectionFocus(
+                buttons[selected],
+                buttons[selected]
+            );
         }
 
-        document.body.appendChild(box);
-
-        draw();
+        Lampa.Noty.show(items[selected]);
     }
 
-    function command(direction) {
+    function choose() {
+        Lampa.Noty.show('ВЫБРАНО: ' + items[selected]);
+    }
 
-        if (direction === 'left') {
+    Lampa.Controller.add('top_nav_03', {
+
+        toggle: function () {
+            focusItem(selected);
+        },
+
+        left: function () {
             if (selected > 0) {
-                selected--;
-                draw();
-                Lampa.Noty.show(items[selected]);
+                focusItem(selected - 1);
             }
-        }
+        },
 
-        if (direction === 'right') {
-            if (selected < items.length - 1) {
-                selected++;
-                draw();
-                Lampa.Noty.show(items[selected]);
+        right: function () {
+            if (selected < buttons.length - 1) {
+                focusItem(selected + 1);
             }
+        },
+
+        up: function () {
+            focusItem(selected);
+        },
+
+        down: function () {
+            Lampa.Controller.toggle('content');
+        },
+
+        ok: function () {
+            choose();
+        },
+
+        back: function () {
+            Lampa.Controller.toggle('content');
         }
+    });
 
-        if (direction === 'up') {
-            visible = true;
-            draw();
-            Lampa.Noty.show('ШТОРКА ОТКРЫТА');
-        }
+    Lampa.Controller.toggle('top_nav_03');
 
-        if (direction === 'down') {
-            visible = false;
-            draw();
-            Lampa.Noty.show('ШТОРКА СКРЫТА');
-        }
+    setTimeout(function () {
+        focusItem(0);
+    }, 300);
 
-        if (direction === 'ok') {
-            Lampa.Noty.show('ВЫБРАНО: ' + items[selected]);
-        }
-    }
-
-    create();
-
-    /*
-     * Подключаемся к системе управления Lampa.
-     */
-    if (Lampa.Controller) {
-
-        Lampa.Controller.add('top_nav_02', {
-
-            toggle: function () {
-                return true;
-            },
-
-            left: function () {
-                command('left');
-            },
-
-            right: function () {
-                command('right');
-            },
-
-            up: function () {
-                command('up');
-            },
-
-            down: function () {
-                command('down');
-            },
-
-            ok: function () {
-                command('ok');
-            },
-
-            back: function () {
-                visible = false;
-                draw();
-            }
-        });
-
-        Lampa.Controller.toggle('top_nav_02');
-    }
-
-    Lampa.Noty.show('TOP NAV 02 ГОТОВ');
+    Lampa.Noty.show('TOP NAV 03');
 
 })();
