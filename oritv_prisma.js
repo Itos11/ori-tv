@@ -1,83 +1,81 @@
 (function () {
     'use strict';
 
-    if (window.ORITV_PRISMA_UI_V3) return;
-    window.ORITV_PRISMA_UI_V3 = true;
-
-    if (!window.Lampa) return;
-
-
-    /* =========================================================
-       ITEMS
-       ========================================================= */
+    if (window.ORITV_PRISMA_UI_V4) return;
+    window.ORITV_PRISMA_UI_V4 = true;
 
     var ITEMS = [
         {
             id: 'main',
             title: 'Главная',
-            icon: '<svg viewBox="0 0 24 24"><path d="M3.5 10.5 12 3l8.5 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-5h5v5"/></svg>'
-        },
-        {
-            id: 'history',
-            title: 'История',
-            icon: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 5v5h5"/><path d="M12 7v5l3.5 2"/></svg>'
+            icon:
+                '<svg viewBox="0 0 24 24">' +
+                '<path d="M3.5 10.5 12 3l8.5 7.5"/>' +
+                '<path d="M5.5 9.5V21h13V9.5"/>' +
+                '<path d="M9.5 21v-5h5v5"/>' +
+                '</svg>'
         },
         {
             id: 'movie',
             title: 'Фильмы',
-            icon: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M10 8.5 15.5 12 10 15.5Z" fill="currentColor" stroke="none"/></svg>'
+            icon:
+                '<svg viewBox="0 0 24 24">' +
+                '<rect x="3" y="4" width="18" height="16" rx="3"/>' +
+                '<path d="M10 8.5 15.5 12 10 15.5Z" fill="currentColor" stroke="none"/>' +
+                '</svg>'
         },
         {
             id: 'tv',
             title: 'Сериалы',
-            icon: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 8h10"/><path d="M7 12h6"/><path d="M7 16h8"/></svg>'
+            icon:
+                '<svg viewBox="0 0 24 24">' +
+                '<rect x="3" y="4" width="18" height="16" rx="3"/>' +
+                '<path d="M7 8h10"/>' +
+                '<path d="M7 12h6"/>' +
+                '<path d="M7 16h8"/>' +
+                '</svg>'
+        },
+        {
+            id: 'history',
+            title: 'История',
+            icon:
+                '<svg viewBox="0 0 24 24">' +
+                '<circle cx="12" cy="12" r="8.5"/>' +
+                '<path d="M12 7v5l3.5 2"/>' +
+                '<path d="M4 7.5V4h3.5"/>' +
+                '</svg>'
         },
         {
             id: 'settings',
             title: 'Настройки',
-            icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 13.5l1.2 1-.9 1.6-1.6-.5a7.5 7.5 0 0 1-1.4 1.2l-.2 1.7h-1.9l-.7-1.6a7.7 7.7 0 0 1-1.5.2l-1 1.4-1.7-.8.3-1.7a7.4 7.4 0 0 1-1.3-1.3l-1.7.2-.6-1.8 1.4-1a7.5 7.5 0 0 1 0-1.7l-1.4-1 .6-1.8 1.7.2A7.4 7.4 0 0 1 8.6 7l-.3-1.7 1.7-.8 1 1.4a7.7 7.7 0 0 1 1.5.2l.7-1.6h1.9l.2 1.7a7.5 7.5 0 0 1 1.4 1.2l1.6-.5.9 1.6-1.2 1a7.5 7.5 0 0 1 0 1.7Z"/></svg>'
+            icon:
+                '<svg viewBox="0 0 24 24">' +
+                '<circle cx="12" cy="12" r="3"/>' +
+                '<path d="M19 13.5l1.2 1-.9 1.6-1.6-.5a7.5 7.5 0 0 1-1.4 1.2l-.2 1.7h-1.9l-.7-1.6a7.7 7.7 0 0 1-1.5.2l-1 1.4-1.7-.8.3-1.7a7.4 7.4 0 0 1-1.3-1.3l-1.7.2-.6-1.8 1.4-1a7.5 7.5 0 0 1 0-1.7l-1.4-1 .6-1.8 1.7.2A7.4 7.4 0 0 1 8.6 7l-.3-1.7 1.7-.8 1 1.4a7.7 7.7 0 0 1 1.5.2l.7-1.6h1.9l.2 1.7a7.5 7.5 0 0 1 1.4 1.2l1.6-.5.9 1.6-1.2 1a7.5 7.5 0 0 1 0 1.7Z"/>' +
+                '</svg>'
         }
     ];
 
-
     var nav = null;
     var buttons = [];
+    var current = 0;
+    var timer = null;
 
     /*
-     * По умолчанию Фильмы
+     * =========================================================
+     * STYLE
+     * =========================================================
      */
-    var current = 2;
-
-    /*
-     * Сейчас фокус находится
-     * в верхней навигации
-     */
-    var navFocused = false;
-
-    var observerStarted = false;
-    var keyboardStarted = false;
-
-
-    /* =========================================================
-       STYLE
-       ========================================================= */
 
     function addStyle() {
 
-        if (
-            document.getElementById(
-                'oritv-prisma-style-v3'
-            )
-        ) return;
+        if (document.getElementById('oritv-prisma-style-v4')) {
+            return;
+        }
 
+        var style = document.createElement('style');
 
-        var style =
-            document.createElement('style');
-
-
-        style.id =
-            'oritv-prisma-style-v3';
-
+        style.id = 'oritv-prisma-style-v4';
 
         style.textContent = `
 
@@ -86,6 +84,7 @@
     position: fixed !important;
 
     top: 8px !important;
+
     left: 50% !important;
 
     transform: translateX(-50%) !important;
@@ -95,16 +94,18 @@
     height: 52px !important;
 
     display: flex !important;
+
     align-items: center !important;
+
     justify-content: center !important;
 
     padding: 4px !important;
+
     margin: 0 !important;
 
     width: max-content !important;
 
-    max-width:
-        calc(100vw - 260px) !important;
+    max-width: calc(100vw - 260px) !important;
 
     box-sizing: border-box !important;
 
@@ -118,7 +119,7 @@
         28px !important;
 
     box-shadow:
-        0 5px 22px rgba(0,0,0,.38),
+        0 5px 22px rgba(0,0,0,.35),
         inset 0 1px 0 rgba(255,255,255,.035) !important;
 
     backdrop-filter:
@@ -135,10 +136,6 @@
 }
 
 
-/* =========================================================
-   ITEM
-   ========================================================= */
-
 .oritv-prisma-item {
 
     position: relative !important;
@@ -146,19 +143,29 @@
     display: flex !important;
 
     align-items: center !important;
+
     justify-content: center !important;
 
     height: 44px !important;
 
-    padding: 0 15px !important;
+    padding:
+        0 15px !important;
 
-    margin: 0 !important;
+    margin:
+        0 !important;
 
-    border-radius: 23px !important;
+    border-radius:
+        23px !important;
 
-    box-sizing: border-box !important;
+    box-sizing:
+        border-box !important;
 
-    flex: 0 0 auto !important;
+    flex:
+        0 0 auto !important;
+
+    width: auto !important;
+
+    min-width: 0 !important;
 
     color:
         rgba(255,255,255,.68) !important;
@@ -184,132 +191,46 @@
     cursor:
         pointer !important;
 
+    opacity:
+        1 !important;
+
     transition:
-        background .12s ease,
-        color .12s ease !important;
+        background .15s ease,
+        color .15s ease,
+        transform .15s ease !important;
 }
 
-
-/* =========================================================
-   FOCUS
-   ========================================================= */
-
-.oritv-prisma-item.oritv-focused {
-
-    color:
-        #ffffff !important;
-
-    background:
-        rgba(255,255,255,.17) !important;
-
-    box-shadow:
-        0 2px 12px rgba(0,0,0,.20) !important;
-}
-
-
-/* =========================================================
-   ACTIVE
-   ========================================================= */
-
-.oritv-prisma-item.oritv-active {
-
-    color:
-        #ffffff !important;
-
-    background:
-        rgba(255,255,255,.12) !important;
-}
-
-
-/* =========================================================
-   FOCUS LINE
-   ========================================================= */
-
-.oritv-prisma-item.oritv-focused::after {
-
-    content: "" !important;
-
-    position: absolute !important;
-
-    left: 50% !important;
-
-    bottom: 2px !important;
-
-    transform:
-        translateX(-50%) !important;
-
-    width: 24px !important;
-
-    height: 3px !important;
-
-    border-radius: 3px !important;
-
-    background:
-        #48f4c4 !important;
-
-    box-shadow:
-        0 0 9px rgba(72,244,196,.55) !important;
-}
-
-
-/* =========================================================
-   ACTIVE LINE
-   ========================================================= */
-
-.oritv-prisma-item.oritv-active::after {
-
-    content: "" !important;
-
-    position: absolute !important;
-
-    left: 50% !important;
-
-    bottom: 2px !important;
-
-    transform:
-        translateX(-50%) !important;
-
-    width: 18px !important;
-
-    height: 2px !important;
-
-    border-radius: 3px !important;
-
-    background:
-        rgba(72,244,196,.65) !important;
-}
-
-
-/* =========================================================
-   ICON
-   ========================================================= */
 
 .oritv-prisma-item svg {
 
-    width: 19px !important;
+    width:
+        19px !important;
 
-    height: 19px !important;
+    height:
+        19px !important;
 
-    margin-right: 7px !important;
+    margin-right:
+        7px !important;
 
-    flex: 0 0 auto !important;
+    flex:
+        0 0 auto !important;
 
-    fill: none !important;
+    fill:
+        none !important;
 
     stroke:
         currentColor !important;
 
-    stroke-width: 1.65 !important;
+    stroke-width:
+        1.65 !important;
 
-    stroke-linecap: round !important;
+    stroke-linecap:
+        round !important;
 
-    stroke-linejoin: round !important;
+    stroke-linejoin:
+        round !important;
 }
 
-
-/* =========================================================
-   TEXT
-   ========================================================= */
 
 .oritv-prisma-text {
 
@@ -319,14 +240,79 @@
     color:
         inherit !important;
 
+    font-size:
+        inherit !important;
+
+    font-weight:
+        inherit !important;
+
     line-height:
         inherit !important;
 }
 
 
-/* =========================================================
-   LAMPA HEADER
-   ========================================================= */
+.oritv-prisma-item.oritv-active {
+
+    color:
+        #ffffff !important;
+
+    background:
+        rgba(255,255,255,.14) !important;
+
+    transform:
+        none !important;
+}
+
+
+.oritv-prisma-item.focus,
+.oritv-prisma-item:focus {
+
+    color:
+        #ffffff !important;
+
+    background:
+        rgba(255,255,255,.14) !important;
+
+}
+
+
+.oritv-prisma-item.oritv-active::after {
+
+    content:
+        "" !important;
+
+    position:
+        absolute !important;
+
+    left:
+        50% !important;
+
+    bottom:
+        2px !important;
+
+    transform:
+        translateX(-50%) !important;
+
+    width:
+        23px !important;
+
+    height:
+        3px !important;
+
+    border-radius:
+        3px !important;
+
+    background:
+        #48f4c4 !important;
+
+    box-shadow:
+        0 0 8px rgba(72,244,196,.45) !important;
+}
+
+
+/*
+ * LAMPA HEADER
+ */
 
 .head__time,
 .head__markers,
@@ -341,9 +327,9 @@
 }
 
 
-/* =========================================================
-   SEARCH
-   ========================================================= */
+/*
+ * SEARCH
+ */
 
 .head__actions .open--search {
 
@@ -358,9 +344,9 @@
 }
 
 
-/* =========================================================
-   NATIVE SETTINGS
-   ========================================================= */
+/*
+ * NATIVE SETTINGS
+ */
 
 .head__actions .open--settings {
 
@@ -372,9 +358,37 @@
 }
 
 
-/* =========================================================
-   BIG SCREEN
-   ========================================================= */
+/*
+ * НАША ШТОРКА ВНУТРИ HEAD
+ */
+
+.head__actions .oritv-prisma-nav {
+
+    display:
+        flex !important;
+
+    visibility:
+        visible !important;
+
+    opacity:
+        1 !important;
+}
+
+
+/*
+ * КОГДА HEAD LAMPA СКРЫВАЕТСЯ —
+ * НАША ШТОРКА ОСТАЁТСЯ ВИДИМОЙ
+ */
+
+.oritv-prisma-nav {
+
+    visibility:
+        visible !important;
+
+    opacity:
+        1 !important;
+}
+
 
 @media (min-width: 1600px) {
 
@@ -383,10 +397,12 @@
         height:
             54px !important;
 
+        padding:
+            4px !important;
+
         border-radius:
             29px !important;
     }
-
 
     .oritv-prisma-item {
 
@@ -400,7 +416,6 @@
             17px !important;
     }
 
-
     .oritv-prisma-item svg {
 
         width:
@@ -411,10 +426,6 @@
     }
 }
 
-
-/* =========================================================
-   SMALL SCREEN
-   ========================================================= */
 
 @media (max-width: 1200px) {
 
@@ -427,7 +438,6 @@
             48px !important;
     }
 
-
     .oritv-prisma-item {
 
         height:
@@ -439,7 +449,6 @@
         font-size:
             14px !important;
     }
-
 
     .oritv-prisma-item svg {
 
@@ -460,18 +469,15 @@
     }
 
 
-    /* =========================================================
-       FIND LAMPA MENU
-       ========================================================= */
+    /*
+     * =========================================================
+     * FIND MENU ITEM
+     * =========================================================
+     */
 
     function findMenuItem(action) {
 
         var item = null;
-
-
-        /*
-         * Сначала настоящий data-action
-         */
 
         try {
 
@@ -482,45 +488,44 @@
                     '"]'
                 );
 
-
-            if (item) return item;
+            if (item) {
+                return item;
+            }
 
         } catch (e) {}
 
-
-        /*
-         * Потом поиск по тексту
-         */
 
         var words = {
 
             main: [
                 'главная',
-                'главн',
-                'home'
+                'главн'
             ],
 
             movie: [
                 'фильмы',
-                'фильм',
-                'movie'
+                'фильм'
             ],
 
             tv: [
                 'сериалы',
-                'сериал',
-                'tv'
+                'сериал'
+            ],
+
+            history: [
+                'история',
+                'history'
             ],
 
             settings: [
                 'настройки',
-                'настрой',
-                'settings'
+                'настрой'
             ]
+
         };
 
 
-        var search =
+        var list =
             words[action] || [];
 
 
@@ -549,19 +554,22 @@
 
                 for (
                     var j = 0;
-                    j < search.length;
+                    j < list.length;
                     j++
                 ) {
 
                     if (
                         text.indexOf(
-                            search[j]
+                            list[j]
                         ) !== -1
                     ) {
 
                         return nodes[i];
+
                     }
+
                 }
+
             }
 
         } catch (e) {}
@@ -571,13 +579,17 @@
     }
 
 
-    /* =========================================================
-       ACTIVATE
-       ========================================================= */
+    /*
+     * =========================================================
+     * ACTIVATE
+     * =========================================================
+     */
 
     function activate(element) {
 
-        if (!element) return false;
+        if (!element) {
+            return false;
+        }
 
 
         try {
@@ -589,7 +601,9 @@
             ) {
 
                 window.jQuery(element)
-                    .trigger('hover:enter');
+                    .trigger(
+                        'hover:enter'
+                    );
 
                 return true;
             }
@@ -618,16 +632,13 @@
     }
 
 
-    /* =========================================================
-       HISTORY
-       ========================================================= */
+    /*
+     * =========================================================
+     * HISTORY
+     * =========================================================
+     */
 
     function openHistory() {
-
-        navFocused = false;
-
-        updateFocus();
-
 
         try {
 
@@ -637,6 +648,7 @@
             ) {
 
                 Lampa.Favorite.read();
+
             }
 
         } catch (e) {}
@@ -651,16 +663,11 @@
                         'favorite',
                         {
                             url: '',
-                            title:
-                                'История просмотров',
-                            component:
-                                'favorite',
-                            type:
-                                'history',
-                            page:
-                                1,
-                            filter:
-                                ''
+                            title: 'История просмотров',
+                            component: 'favorite',
+                            type: 'history',
+                            page: 1,
+                            filter: ''
                         }
                     );
 
@@ -672,16 +679,13 @@
     }
 
 
-    /* =========================================================
-       SETTINGS
-       ========================================================= */
+    /*
+     * =========================================================
+     * SETTINGS
+     * =========================================================
+     */
 
     function openSettings() {
-
-        navFocused = false;
-
-        updateFocus();
-
 
         var settings = null;
 
@@ -700,6 +704,7 @@
                     document.querySelector(
                         '.open--settings'
                     );
+
             }
 
         } catch (e) {}
@@ -710,40 +715,49 @@
             activate(settings);
 
             return;
+
         }
 
 
-        var item =
-            findMenuItem('settings');
+        var menuItem =
+            findMenuItem(
+                'settings'
+            );
 
 
-        if (item) {
+        if (menuItem) {
 
-            activate(item);
+            activate(menuItem);
 
             return;
+
         }
 
 
         try {
 
-            Lampa.Controller.toggle(
-                'menu'
-            );
+            if (
+                Lampa.Controller &&
+                Lampa.Controller.toggle
+            ) {
+
+                Lampa.Controller.toggle(
+                    'menu'
+                );
+
+            }
 
         } catch (e) {}
     }
 
 
-    /* =========================================================
-       OPEN SECTION
-       ========================================================= */
+    /*
+     * =========================================================
+     * OPEN SECTION
+     * =========================================================
+     */
 
     function openSection(id) {
-
-        /*
-         * ИСТОРИЯ
-         */
 
         if (id === 'history') {
 
@@ -753,10 +767,6 @@
         }
 
 
-        /*
-         * НАСТРОЙКИ
-         */
-
         if (id === 'settings') {
 
             openSettings();
@@ -765,64 +775,50 @@
         }
 
 
-        /*
-         * ГЛАВНАЯ / ФИЛЬМЫ / СЕРИАЛЫ
-         */
-
-        var item =
-            findMenuItem(id);
+        var element =
+            findMenuItem(
+                id
+            );
 
 
-        if (item) {
+        if (element) {
 
-            navFocused = false;
-
-            updateFocus();
-
-
-            setTimeout(
-                function () {
-
-                    activate(item);
-
-                },
-                50
+            activate(
+                element
             );
 
             return;
         }
 
 
-        /*
-         * Lampa может создать меню
-         * чуть позже.
-         */
-
         setTimeout(
             function () {
 
                 var retry =
-                    findMenuItem(id);
+                    findMenuItem(
+                        id
+                    );
 
 
                 if (retry) {
 
-                    navFocused = false;
+                    activate(
+                        retry
+                    );
 
-                    updateFocus();
-
-                    activate(retry);
                 }
 
             },
-            350
+            300
         );
     }
 
 
-    /* =========================================================
-       ACTIVE
-       ========================================================= */
+    /*
+     * =========================================================
+     * ACTIVE
+     * =========================================================
+     */
 
     function setActive(index) {
 
@@ -830,6 +826,7 @@
 
             index =
                 ITEMS.length - 1;
+
         }
 
 
@@ -838,6 +835,7 @@
         ) {
 
             index = 0;
+
         }
 
 
@@ -850,69 +848,66 @@
             i++
         ) {
 
-            if (i === current) {
+            if (
+                i === current
+            ) {
 
-                buttons[i].classList.add(
-                    'oritv-active'
-                );
+                buttons[i]
+                    .classList
+                    .add(
+                        'oritv-active'
+                    );
 
             } else {
 
-                buttons[i].classList.remove(
-                    'oritv-active'
-                );
+                buttons[i]
+                    .classList
+                    .remove(
+                        'oritv-active'
+                    );
+
             }
+
         }
-
-
-        updateFocus();
     }
 
 
-    /* =========================================================
-       FOCUS
-       ========================================================= */
+    /*
+     * =========================================================
+     * CONTROLLER BRIDGE
+     * =========================================================
+     */
 
-    function updateFocus() {
+    var navFocused = false;
 
-        for (
-            var i = 0;
-            i < buttons.length;
-            i++
+
+    function focusNav() {
+
+        if (
+            !nav ||
+            !buttons.length
         ) {
 
-            buttons[i].classList.toggle(
-                'oritv-focused',
-                navFocused &&
-                i === current
-            );
-        }
-    }
+            return false;
 
-
-    /* =========================================================
-       ENTER NAVIGATION
-       ========================================================= */
-
-    function focusNavigation() {
-
-        if (!nav) {
-
-            createNav();
         }
 
-
-        navFocused = true;
-
-
-        updateFocus();
-
-
-        /*
-         * Настоящий Lampa focus
-         */
 
         try {
+
+            if (
+                Lampa.Controller &&
+                Lampa.Controller.collectionSet
+            ) {
+
+                Lampa.Controller.collectionSet(
+                    nav,
+                    false,
+                    true
+                );
+
+            }
+
 
             if (
                 Lampa.Controller &&
@@ -921,203 +916,325 @@
 
                 Lampa.Controller.collectionFocus(
                     buttons[current],
-                    nav
+                    nav,
+                    true
                 );
+
+                return true;
+
             }
 
         } catch (e) {}
-    }
 
-
-    /* =========================================================
-       LEAVE NAVIGATION
-       ========================================================= */
-
-    function leaveNavigation() {
-
-        navFocused = false;
-
-        updateFocus();
-
-
-        /*
-         * Возвращаем управление
-         * контенту Lampa.
-         */
 
         try {
 
-            if (
-                Lampa.Controller &&
-                Lampa.Controller.toggle
-            ) {
+            if (window.jQuery) {
 
-                Lampa.Controller.toggle(
-                    'content'
+                window.jQuery(
+                    buttons[current]
+                )
+                .trigger(
+                    'hover:focus'
                 );
+
+                return true;
+
             }
 
         } catch (e) {}
+
+
+        return false;
     }
 
 
-    /* =========================================================
-       KEYBOARD / REMOTE
-       ========================================================= */
+    /*
+     * =========================================================
+     * KEYBOARD / REMOTE
+     * =========================================================
+     */
 
-    function installKeyboard() {
+    function handleKey(event) {
 
-        if (keyboardStarted) return;
-
-        keyboardStarted = true;
-
-
-        document.addEventListener(
-            'keydown',
-            function (event) {
-
-                var code =
-                    event.keyCode;
+        var key =
+            event.key ||
+            event.code ||
+            '';
 
 
-                /*
-                 * ==============================================
-                 * ФОКУС В НАШЕЙ НАВИГАЦИИ
-                 * ==============================================
-                 */
-
-                if (navFocused) {
+        var code =
+            event.keyCode ||
+            event.which ||
+            0;
 
 
-                    /*
-                     * LEFT
-                     */
-
-                    if (code === 37) {
-
-                        event.preventDefault();
-                        event.stopPropagation();
-
-                        setActive(
-                            current - 1
-                        );
-
-                        return;
-                    }
+        var up =
+            key === 'ArrowUp' ||
+            key === 'Up' ||
+            code === 38;
 
 
-                    /*
-                     * RIGHT
-                     */
-
-                    if (code === 39) {
-
-                        event.preventDefault();
-                        event.stopPropagation();
-
-                        setActive(
-                            current + 1
-                        );
-
-                        return;
-                    }
+        var down =
+            key === 'ArrowDown' ||
+            key === 'Down' ||
+            code === 40;
 
 
-                    /*
-                     * OK / ENTER
-                     */
-
-                    if (
-                        code === 13 ||
-                        code === 23
-                    ) {
-
-                        event.preventDefault();
-                        event.stopPropagation();
-
-                        openSection(
-                            ITEMS[current].id
-                        );
-
-                        return;
-                    }
+        var left =
+            key === 'ArrowLeft' ||
+            key === 'Left' ||
+            code === 37;
 
 
-                    /*
-                     * DOWN
-                     */
-
-                    if (code === 40) {
-
-                        event.preventDefault();
-                        event.stopPropagation();
-
-                        leaveNavigation();
-
-                        return;
-                    }
+        var right =
+            key === 'ArrowRight' ||
+            key === 'Right' ||
+            code === 39;
 
 
-                    /*
-                     * BACK
-                     */
-
-                    if (
-                        code === 27 ||
-                        code === 461
-                    ) {
-
-                        event.preventDefault();
-                        event.stopPropagation();
-
-                        leaveNavigation();
-
-                        return;
-                    }
+        var ok =
+            key === 'Enter' ||
+            key === 'NumpadEnter' ||
+            key === 'OK' ||
+            code === 13 ||
+            code === 32;
 
 
-                    return;
-                }
+        var back =
+            key === 'Escape' ||
+            key === 'Esc' ||
+            key === 'Backspace' ||
+            key === 'GoBack' ||
+            code === 27 ||
+            code === 8;
 
-
-                /*
-                 * ==============================================
-                 * ОБЫЧНЫЙ LAMPA
-                 * ==============================================
-                 *
-                 * UP переводит фокус наверх.
-                 */
-
-                if (code === 38) {
-
-                    focusNavigation();
-
-                    return;
-                }
-
-            },
-            true
-        );
-    }
-
-
-    /* =========================================================
-       CREATE NAV
-       ========================================================= */
-
-    function createNav() {
 
         if (
-            nav &&
-            document.body.contains(nav)
+            !nav ||
+            !buttons.length
         ) {
+
+            return;
+
+        }
+
+
+        /*
+         * =====================================================
+         * В ШТОРКЕ НЕ НАХОДИМСЯ
+         * =====================================================
+         */
+
+        if (!navFocused) {
+
+            /*
+             * Только ↑ забираем себе.
+             */
+
+            if (up) {
+
+                navFocused = true;
+
+                focusNav();
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+            }
 
             return;
         }
 
 
+        /*
+         * =====================================================
+         * ВЛЕВО / ВПРАВО
+         * =====================================================
+         */
+
+        if (
+            left ||
+            right
+        ) {
+
+            current +=
+                right
+                    ? 1
+                    : -1;
+
+
+            if (
+                current < 0
+            ) {
+
+                current =
+                    buttons.length - 1;
+
+            }
+
+
+            if (
+                current >= buttons.length
+            ) {
+
+                current = 0;
+
+            }
+
+
+            setActive(
+                current
+            );
+
+
+            focusNav();
+
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            return;
+        }
+
+
+        /*
+         * =====================================================
+         * OK
+         * =====================================================
+         */
+
+        if (ok) {
+
+            var item =
+                ITEMS[current];
+
+
+            if (item) {
+
+                openSection(
+                    item.id
+                );
+
+            }
+
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            return;
+        }
+
+
+        /*
+         * =====================================================
+         * DOWN / BACK
+         * =====================================================
+         */
+
+        if (
+            down ||
+            back
+        ) {
+
+            navFocused =
+                false;
+
+
+            /*
+             * DOWN возвращает
+             * управление контенту Lampa.
+             */
+
+            try {
+
+                if (
+                    down &&
+                    Lampa.Controller &&
+                    Lampa.Controller.toggle
+                ) {
+
+                    Lampa.Controller.toggle(
+                        'content'
+                    );
+
+                }
+
+            } catch (e) {}
+
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * INSTALL KEYBOARD
+     * =========================================================
+     */
+
+    function installKeyboard() {
+
+        if (
+            window.ORITV_PRISMA_KEYS_V4
+        ) {
+
+            return;
+
+        }
+
+
+        window.ORITV_PRISMA_KEYS_V4 =
+            true;
+
+
+        document.addEventListener(
+            'keydown',
+            handleKey,
+            true
+        );
+
+    }
+
+
+    /*
+     * =========================================================
+     * CREATE NAV
+     * =========================================================
+     */
+
+    function createNav() {
+
+        if (nav) {
+
+            if (
+                document.body.contains(
+                    nav
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            nav = null;
+
+        }
+
+
         nav =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
 
 
         nav.className =
@@ -1140,15 +1257,32 @@
 
 
                 var button =
-                    document.createElement('div');
+                    document.createElement(
+                        'div'
+                    );
 
+
+                /*
+                 * ВАЖНО:
+                 * head__action + selector
+                 *
+                 * Это позволяет штатному
+                 * Controller Lampa видеть
+                 * нашу кнопку как элемент Head.
+                 */
 
                 button.className =
-                    'oritv-prisma-item selector';
+                    'head__action selector oritv-prisma-item';
 
 
                 button.setAttribute(
                     'data-oritv-action',
+                    data.id
+                );
+
+
+                button.setAttribute(
+                    'data-prisma-action',
                     data.id
                 );
 
@@ -1161,64 +1295,61 @@
 
 
                 /*
-                 * Мышь
+                 * =================================================
+                 * MOUSE
+                 * =================================================
                  */
 
                 button.addEventListener(
                     'mouseenter',
                     function () {
 
-                        current =
-                            index;
+                        setActive(
+                            index
+                        );
 
-                        navFocused =
-                            true;
-
-                        setActive(index);
                     }
                 );
 
-
-                /*
-                 * Мышь click
-                 */
 
                 button.addEventListener(
                     'click',
                     function (event) {
 
                         event.preventDefault();
+
                         event.stopPropagation();
 
-                        current =
-                            index;
 
-                        navFocused =
-                            true;
+                        setActive(
+                            index
+                        );
 
-                        setActive(index);
 
                         openSection(
                             data.id
                         );
+
                     }
                 );
 
 
                 /*
-                 * Lampa hover
+                 * =================================================
+                 * LAMPA HOVER EVENTS
+                 * =================================================
                  */
 
                 if (window.jQuery) {
 
                     try {
 
-                        window.jQuery(button).on(
+                        window.jQuery(
+                            button
+                        )
+                        .on(
                             'hover:focus',
                             function () {
-
-                                current =
-                                    index;
 
                                 navFocused =
                                     true;
@@ -1226,57 +1357,62 @@
                                 setActive(
                                     index
                                 );
+
                             }
                         );
 
 
-                        window.jQuery(button).on(
+                        window.jQuery(
+                            button
+                        )
+                        .on(
                             'hover:enter',
                             function () {
 
-                                current =
-                                    index;
+                                navFocused =
+                                    true;
+
+                                setActive(
+                                    index
+                                );
+
 
                                 openSection(
                                     data.id
                                 );
+
                             }
                         );
 
                     } catch (e) {}
+
                 }
 
 
-                buttons.push(button);
+                buttons.push(
+                    button
+                );
+
 
                 nav.appendChild(
                     button
                 );
 
+
             })(i);
+
         }
 
 
-        document.body.appendChild(
-            nav
-        );
-
-
         /*
-         * Фильмы активны
+         * =========================================================
+         * ГЛАВНОЕ ИЗМЕНЕНИЕ:
+         * ВСТАВЛЯЕМ ШТОРКУ В HEAD LAMPA
+         * =========================================================
          */
 
-        setActive(current);
-    }
-
-
-    /* =========================================================
-       CLEAN LAMPA HEAD
-       ========================================================= */
-
-    function cleanHead() {
-
-        var actions = null;
+        var actions =
+            null;
 
 
         try {
@@ -1286,17 +1422,13 @@
                 Lampa.Head.render
             ) {
 
-                var head =
-                    Lampa.Head.render();
-
-
-                if (head) {
-
-                    actions =
-                        head.querySelector(
+                actions =
+                    Lampa.Head
+                        .render()
+                        .querySelector(
                             '.head__actions'
                         );
-                }
+
             }
 
         } catch (e) {}
@@ -1304,14 +1436,103 @@
 
         if (!actions) {
 
-            actions =
-                document.querySelector(
-                    '.head__actions'
-                );
+            try {
+
+                actions =
+                    document.querySelector(
+                        '.head__actions'
+                    );
+
+            } catch (e) {}
+
         }
 
 
-        if (!actions) return;
+        if (actions) {
+
+            /*
+             * Теперь Controller Lampa
+             * видит selector-кнопки.
+             */
+
+            actions.appendChild(
+                nav
+            );
+
+        } else {
+
+            /*
+             * Резервный вариант.
+             */
+
+            document.body.appendChild(
+                nav
+            );
+
+        }
+
+
+        /*
+         * По умолчанию Фильмы.
+         */
+
+        setActive(
+            1
+        );
+
+    }
+
+
+    /*
+     * =========================================================
+     * CLEAN HEAD
+     * =========================================================
+     */
+
+    function cleanHead() {
+
+        var actions =
+            null;
+
+
+        try {
+
+            if (
+                Lampa.Head &&
+                Lampa.Head.render
+            ) {
+
+                actions =
+                    Lampa.Head
+                        .render()
+                        .querySelector(
+                            '.head__actions'
+                        );
+
+            }
+
+        } catch (e) {}
+
+
+        if (!actions) {
+
+            try {
+
+                actions =
+                    document.querySelector(
+                        '.head__actions'
+                    );
+
+            } catch (e) {}
+
+        }
+
+
+        if (!actions) {
+
+            return;
+
+        }
 
 
         var children =
@@ -1331,16 +1552,24 @@
 
 
             /*
-             * Нашу навигацию не трогаем.
+             * НАШУ ШТОРКУ НЕ ТРОГАЕМ
              */
 
             if (
-                child === nav
+                child === nav ||
+                child.classList.contains(
+                    'oritv-prisma-nav'
+                )
             ) {
 
                 continue;
+
             }
 
+
+            /*
+             * ПОИСК ОСТАВЛЯЕМ
+             */
 
             var classes =
                 typeof child.className ===
@@ -1348,10 +1577,6 @@
                     ? child.className
                     : '';
 
-
-            /*
-             * Поиск оставляем.
-             */
 
             if (
                 classes.indexOf(
@@ -1365,24 +1590,21 @@
                     'important'
                 );
 
+
                 child.style.setProperty(
                     'visibility',
                     'visible',
                     'important'
                 );
 
-                child.style.setProperty(
-                    'opacity',
-                    '1',
-                    'important'
-                );
 
                 continue;
+
             }
 
 
             /*
-             * Настройки скрываем.
+             * НАСТРОЙКИ LAMPA СКРЫВАЕМ
              */
 
             if (
@@ -1397,12 +1619,22 @@
                     'important'
                 );
 
+
+                child.style.setProperty(
+                    'visibility',
+                    'hidden',
+                    'important'
+                );
+
+
                 continue;
+
             }
 
 
             /*
-             * Остальные штатные иконки.
+             * ОСТАЛЬНЫЕ ИКОНКИ
+             * УБИРАЕМ
              */
 
             try {
@@ -1411,23 +1643,30 @@
 
             } catch (e) {
 
-                child.style.setProperty(
-                    'display',
-                    'none',
-                    'important'
-                );
+                try {
+
+                    child.style.setProperty(
+                        'display',
+                        'none',
+                        'important'
+                    );
+
+                } catch (ee) {}
+
             }
+
         }
+
     }
 
 
-    /* =========================================================
-       INSTALL
-       ========================================================= */
+    /*
+     * =========================================================
+     * INSTALL
+     * =========================================================
+     */
 
     function install() {
-
-        if (!document.body) return;
 
         addStyle();
 
@@ -1436,19 +1675,17 @@
         cleanHead();
 
         installKeyboard();
+
     }
 
 
-    /* =========================================================
-       OBSERVER
-       ========================================================= */
+    /*
+     * =========================================================
+     * OBSERVER
+     * =========================================================
+     */
 
     function startObserver() {
-
-        if (observerStarted) return;
-
-        observerStarted = true;
-
 
         if (
             typeof MutationObserver ===
@@ -1456,6 +1693,7 @@
         ) {
 
             return;
+
         }
 
 
@@ -1463,41 +1701,48 @@
             new MutationObserver(
                 function () {
 
-
                     /*
-                     * Lampa могла пересоздать DOM.
+                     * Lampa может пересоздать Head.
                      */
 
                     if (
                         !nav ||
-                        !document.body.contains(nav)
+                        !document.body.contains(
+                            nav
+                        )
                     ) {
 
                         createNav();
+
                     }
 
 
                     cleanHead();
+
                 }
             );
 
 
-        observer.observe(
-            document.body,
-            {
-                childList:
-                    true,
+        if (document.body) {
 
-                subtree:
-                    true
-            }
-        );
+            observer.observe(
+                document.body,
+                {
+                    childList: true,
+                    subtree: true
+                }
+            );
+
+        }
+
     }
 
 
-    /* =========================================================
-       START
-       ========================================================= */
+    /*
+     * =========================================================
+     * START
+     * =========================================================
+     */
 
     function start() {
 
@@ -1509,12 +1754,14 @@
             );
 
             return;
+
         }
 
 
         install();
 
         startObserver();
+
     }
 
 
