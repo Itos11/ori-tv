@@ -1,8 +1,8 @@
 (function () {
     'use strict';
 
-    if (window.PRISMA_NAV_V3_ONLY) return;
-    window.PRISMA_NAV_V3_ONLY = true;
+    if (window.PRISMA_NAV_FINAL) return;
+    window.PRISMA_NAV_FINAL = true;
 
     var ITEMS = [
         { title: 'ГЛАВНОЕ', action: 'main' },
@@ -21,71 +21,70 @@
 
     function installStyle() {
 
-        if (document.getElementById('prisma-only-style')) {
+        if (document.getElementById('prisma-final-style')) {
             return;
         }
 
         var style = document.createElement('style');
 
-        style.id = 'prisma-only-style';
+        style.id = 'prisma-final-style';
 
         style.textContent = `
 
-            /*
-             * =================================================
-             * УБИРАЕМ НЕНУЖНЫЕ ЭЛЕМЕНТЫ LAMPA
-             * =================================================
-             */
+            /* =================================================
+               УБИРАЕМ ВСЁ ЛИШНЕЕ
+               ================================================= */
 
-            /*
-             * Оставляем первые и третью штатные иконки:
-             *
-             * 1 = ПОИСК
-             * 2 = УВЕДОМЛЕНИЯ
-             * 3 = НАСТРОЙКИ
-             * 4 = ПРОФИЛЬ
-             * 5 = ПОЛНЫЙ ЭКРАН
-             */
+            .head .head__actions > .head__action:not(.open--search):not(.open--settings) {
+                display: none !important;
+            }
 
-            .head__actions > .head__action:nth-child(2),
-            .head__actions > .head__action:nth-child(4),
-            .head__actions > .head__action:nth-child(5),
-            .head__actions > .full--screen {
+            /* Полный экран */
+            .head .head__actions > .full--screen {
+                display: none !important;
+            }
 
+            /* Уведомления */
+            .head .head__actions > .open--notice {
+                display: none !important;
+            }
+
+            /* Профиль */
+            .head .head__actions > .open--profile {
+                display: none !important;
+            }
+
+            /* Другие дополнительные кнопки */
+            .head .head__actions > .open--broadcast,
+            .head .head__actions > .open--feed,
+            .head .head__actions > .open--premium {
+                display: none !important;
+            }
+
+            /* Индикаторы */
+            .head .head__markers {
+                display: none !important;
+            }
+
+            /* Часы */
+            .head .head__time {
                 display: none !important;
             }
 
 
-            /*
-             * Часы
-             */
+            /* =================================================
+               НАША НАВИГАЦИЯ
+               ================================================= */
 
-            .head__time {
+            .prisma-final-container {
 
-                display: none !important;
-            }
+                position: absolute !important;
 
+                left: 37% !important;
 
-            /*
-             * Возможные дополнительные индикаторы
-             */
+                top: 0 !important;
 
-            .head__actions .head__clock,
-            .head__actions .head__time,
-            .head__actions .head__status,
-            .head__actions .head__more {
-
-                display: none !important;
-            }
-
-
-            /*
-             * =================================================
-             * НАША НАВИГАЦИЯ
-             * =================================================
-             */
-
-            .prisma-only-container {
+                height: 60px !important;
 
                 display: flex !important;
 
@@ -93,33 +92,19 @@
 
                 align-items: center !important;
 
-                justify-content: center !important;
-
-                flex-wrap: nowrap !important;
+                justify-content: flex-start !important;
 
                 gap: 3px !important;
 
-                position: absolute !important;
-
-                left: 29% !important;
-
-                right: 25% !important;
-
-                top: 0 !important;
-
-                height: 60px !important;
-
-                width: auto !important;
+                margin: 0 !important;
 
                 padding: 0 !important;
 
-                margin: 0 !important;
-
                 box-sizing: border-box !important;
 
-                overflow: visible !important;
-
                 white-space: nowrap !important;
+
+                overflow: visible !important;
 
                 z-index: 999999 !important;
 
@@ -127,13 +112,11 @@
             }
 
 
-            /*
-             * =================================================
-             * КНОПКИ
-             * =================================================
-             */
+            /* =================================================
+               ПУНКТЫ
+               ================================================= */
 
-            .prisma-only-item {
+            .prisma-final-item {
 
                 display: flex !important;
 
@@ -141,155 +124,154 @@
 
                 justify-content: center !important;
 
-                flex: 0 1 auto !important;
+                flex: 0 0 auto !important;
 
-                width: auto !important;
+                height: 44px !important;
 
-                min-width: 0 !important;
+                padding: 0 10px !important;
 
-                height: 46px !important;
-
-                margin: 0 2px !important;
-
-                padding: 0 13px !important;
-
-                box-sizing: border-box !important;
+                margin: 0 !important;
 
                 border-radius: 8px !important;
 
-                color: rgba(255,255,255,.85) !important;
+                box-sizing: border-box !important;
 
-                font-family: Arial, sans-serif !important;
-
-                font-size: 16px !important;
-
-                font-weight: 600 !important;
-
-                line-height: 46px !important;
-
-                white-space: nowrap !important;
-
-                opacity: .85 !important;
+                color: rgba(255,255,255,.82) !important;
 
                 background: transparent !important;
 
-                overflow: visible !important;
+                font-family: Arial, sans-serif !important;
 
-                z-index: 999999 !important;
+                font-size: 15px !important;
+
+                font-weight: 600 !important;
+
+                line-height: 44px !important;
+
+                white-space: nowrap !important;
+
+                opacity: .86 !important;
 
                 transition:
                     background .12s ease,
                     transform .12s ease,
                     opacity .12s ease !important;
+
+                z-index: 1000000 !important;
             }
 
 
-            /*
-             * Фокус
-             */
+            /* =================================================
+               ФОКУС
+               ================================================= */
 
-            .prisma-only-item.focus {
+            .prisma-final-item.focus {
 
                 color: #ffffff !important;
-
-                opacity: 1 !important;
 
                 background: rgba(255,255,255,.20) !important;
 
-                transform: scale(1.05) !important;
-
-                box-shadow:
-                    0 2px 12px rgba(0,0,0,.20) !important;
-            }
-
-
-            /*
-             * Наведение мышью
-             */
-
-            .prisma-only-item:hover {
-
-                color: #ffffff !important;
-
                 opacity: 1 !important;
 
-                background: rgba(255,255,255,.12) !important;
+                transform: scale(1.04) !important;
+
+                box-shadow:
+                    0 2px 10px rgba(0,0,0,.20) !important;
             }
 
 
-            /*
-             * =================================================
-             * ПОИСК И НАСТРОЙКИ
-             * =================================================
-             *
-             * Немного ближе друг к другу.
-             */
+            /* =================================================
+               ПОИСК И НАСТРОЙКИ
+               ================================================= */
 
-            .head__actions > .head__action:nth-child(1),
-            .head__actions > .head__action:nth-child(3) {
+            .head .head__actions {
 
-                margin-left: 4px !important;
+                display: flex !important;
 
-                margin-right: 4px !important;
+                align-items: center !important;
+
+                flex-shrink: 0 !important;
+            }
+
+            .head .head__actions > .open--search,
+            .head .head__actions > .open--settings {
+
+                display: flex !important;
+
+                visibility: visible !important;
+
+                opacity: 1 !important;
             }
 
 
-            /*
-             * =================================================
-             * МАЛЕНЬКИЙ ЭКРАН
-             * =================================================
-             */
+            /* =================================================
+               ТВ / БОЛЬШОЙ ЭКРАН
+               ================================================= */
 
-            @media (max-width: 1200px) {
+            @media (min-width: 1400px) {
 
-                .prisma-only-container {
+                .prisma-final-container {
 
-                    left: 27% !important;
+                    left: 37% !important;
 
-                    right: 23% !important;
-
-                    gap: 1px !important;
+                    gap: 4px !important;
                 }
 
-                .prisma-only-item {
+                .prisma-final-item {
 
-                    padding-left: 8px !important;
+                    padding-left: 12px !important;
 
-                    padding-right: 8px !important;
+                    padding-right: 12px !important;
 
-                    margin-left: 1px !important;
-
-                    margin-right: 1px !important;
-
-                    font-size: 14px !important;
+                    font-size: 16px !important;
                 }
             }
 
 
-            /*
-             * =================================================
-             * БОЛЬШОЙ ТВ
-             * =================================================
-             */
+            /* =================================================
+               ОЧЕНЬ БОЛЬШОЙ ТВ
+               ================================================= */
 
-            @media (min-width: 1600px) {
+            @media (min-width: 1800px) {
 
-                .prisma-only-container {
+                .prisma-final-container {
 
-                    left: 27% !important;
-
-                    right: 22% !important;
+                    left: 36% !important;
 
                     gap: 5px !important;
                 }
 
-                .prisma-only-item {
+                .prisma-final-item {
 
-                    padding-left: 17px !important;
+                    padding-left: 15px !important;
 
-                    padding-right: 17px !important;
+                    padding-right: 15px !important;
 
                     font-size: 18px !important;
+                }
+            }
+
+
+            /* =================================================
+               МЕНЬШЕ 1200
+               ================================================= */
+
+            @media (max-width: 1200px) {
+
+                .prisma-final-container {
+
+                    left: 34% !important;
+
+                    gap: 1px !important;
+                }
+
+                .prisma-final-item {
+
+                    padding-left: 7px !important;
+
+                    padding-right: 7px !important;
+
+                    font-size: 13px !important;
                 }
             }
 
@@ -300,7 +282,7 @@
 
 
     /* =========================================================
-       ПОИСК ШТАТНОГО ПУНКТА
+       НАЙТИ ШТАТНЫЙ ПУНКТ
        ========================================================= */
 
     function findMenuItem(action) {
@@ -321,7 +303,7 @@
 
 
     /* =========================================================
-       ЗАПУСК ПУНКТА LAMPA
+       ЗАПУСТИТЬ ШТАТНЫЙ ПУНКТ
        ========================================================= */
 
     function activateMenuItem(element) {
@@ -380,35 +362,31 @@
                 Lampa.Favorite &&
                 Lampa.Favorite.read
             ) {
-
                 Lampa.Favorite.read();
             }
 
         } catch (e) {}
 
 
-        setTimeout(
-            function () {
+        setTimeout(function () {
 
-                try {
+            try {
 
-                    Lampa.Router.call(
-                        'favorite',
-                        {
-                            url: '',
-                            title: 'История просмотров',
-                            component: 'favorite',
-                            type: 'history',
-                            page: 1,
-                            filter: ''
-                        }
-                    );
+                Lampa.Router.call(
+                    'favorite',
+                    {
+                        url: '',
+                        title: 'История просмотров',
+                        component: 'favorite',
+                        type: 'history',
+                        page: 1,
+                        filter: ''
+                    }
+                );
 
-                } catch (e) {}
+            } catch (e) {}
 
-            },
-            250
-        );
+        }, 250);
     }
 
 
@@ -438,32 +416,31 @@
         }
 
 
-        setTimeout(
-            function () {
+        setTimeout(function () {
 
-                var retry =
-                    findMenuItem(action);
+            var retry =
+                findMenuItem(action);
 
-                if (retry) {
+            if (retry) {
 
-                    activateMenuItem(retry);
-                }
+                activateMenuItem(retry);
+            }
 
-            },
-            300
-        );
+        }, 300);
     }
 
 
     /* =========================================================
-       СОЗДАНИЕ КНОПКИ
+       СОЗДАТЬ КНОПКУ
        ========================================================= */
 
     function createButton(item) {
 
         var button = $(
-            '<div ' +
-            'class="head__action selector prisma-only-item">' +
+            '<div class="' +
+            'head__action ' +
+            'selector ' +
+            'prisma-final-item">' +
             '</div>'
         );
 
@@ -566,7 +543,7 @@
 
         if (
             document.querySelector(
-                '.prisma-only-container'
+                '.prisma-final-container'
             )
         ) {
 
@@ -579,24 +556,20 @@
         installStyle();
 
 
-        /*
-         * =====================================================
-         * НАШ КОНТЕЙНЕР
-         * =====================================================
-         */
+        /* =====================================================
+           СОЗДАЁМ КОНТЕЙНЕР
+           ===================================================== */
 
         var container =
             document.createElement('div');
 
         container.className =
-            'prisma-only-container';
+            'prisma-final-container';
 
 
-        /*
-         * =====================================================
-         * ПЯТЬ ПУНКТОВ
-         * =====================================================
-         */
+        /* =====================================================
+           СОЗДАЁМ 5 ПУНКТОВ
+           ===================================================== */
 
         for (
             var i = 0;
@@ -619,11 +592,9 @@
         }
 
 
-        /*
-         * =====================================================
-         * ВСТАВКА В HEAD
-         * =====================================================
-         */
+        /* =====================================================
+           ДОБАВЛЯЕМ В HEAD
+           ===================================================== */
 
         try {
 
@@ -650,26 +621,23 @@
     var attempts = 0;
 
     var timer =
-        setInterval(
-            function () {
+        setInterval(function () {
 
-                attempts++;
+            attempts++;
 
-                if (install()) {
+            if (install()) {
 
-                    clearInterval(timer);
+                clearInterval(timer);
 
-                    return;
-                }
+                return;
+            }
 
 
-                if (attempts >= 150) {
+            if (attempts >= 150) {
 
-                    clearInterval(timer);
-                }
+                clearInterval(timer);
+            }
 
-            },
-            200
-        );
+        }, 200);
 
 })();
