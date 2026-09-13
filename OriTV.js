@@ -1,503 +1,624 @@
 (function () {
     'use strict';
 
-    /*
-     * ORITV
-     * Рабочая верхняя навигация Lampa
-     */
+    if (window.ORITV_NAV_V4) return;
+    window.ORITV_NAV_V4 = true;
 
-    if (window.ORITV_NAV) return;
-    window.ORITV_NAV = true;
-
-    var items = [
-        'ГЛАВНОЕ',
-        'ИСТОРИЯ',
-        'ФИЛЬМЫ',
-        'СЕРИАЛЫ',
-        'МУЛЬТФИЛЬМЫ'
+    var ITEMS = [
+        { title: 'ГЛАВНОЕ', action: 'main' },
+        { title: 'ИСТОРИЯ', action: 'history' },
+        { title: 'ФИЛЬМЫ', action: 'movie' },
+        { title: 'СЕРИАЛЫ', action: 'tv' },
+        { title: 'МУЛЬТФИЛЬМЫ', action: 'cartoon' }
     ];
 
-    var actions = [
-        'main',
-        'history',
-        'movie',
-        'tv',
-        'cartoon'
-    ];
-
-    var selected = 0;
-    var visible = false;
-    var box = null;
-    var buttons = [];
+    var installed = false;
 
 
-    /* =====================================================
-       УВЕДОМЛЕНИЕ
-       ===================================================== */
+    /* =========================================================
+       СТИЛИ
+       ========================================================= */
 
-    function notify(text) {
+    function addStyle() {
 
-        try {
+        if (document.getElementById('oritv-v4-style')) {
+            return;
+        }
 
-            if (
-                window.Lampa &&
-                Lampa.Noty &&
-                Lampa.Noty.show
-            ) {
-                Lampa.Noty.show(text);
+        var style = document.createElement('style');
+
+        style.id = 'oritv-v4-style';
+
+        style.textContent = `
+
+            /*
+             * =================================================
+             * НАША ПАНЕЛЬ
+             * =================================================
+             */
+
+            .oritv-v4-container {
+                position: absolute !important;
+
+                left: 50% !important;
+                top: 0 !important;
+
+                transform: translateX(-50%) !important;
+
+                height: 60px !important;
+
+                display: flex !important;
+
+                align-items: center !important;
+                justify-content: center !important;
+
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+
+                gap: 4px !important;
+
+                padding: 0 !important;
+                margin: 0 !important;
+
+                width: max-content !important;
+
+                max-width: 58vw !important;
+
+                box-sizing: border-box !important;
+
+                overflow: visible !important;
+
+                white-space: nowrap !important;
+
+                z-index: 999999 !important;
             }
-
-        } catch (e) {}
-
-    }
-
-
-    /* =====================================================
-       СОЗДАНИЕ ШТОРКИ
-       ===================================================== */
-
-    function create() {
-
-        if (box) return;
-
-
-        box =
-            document.createElement('div');
-
-
-        box.id =
-            'oritv-nav';
-
-
-        box.style.position =
-            'fixed';
-
-        box.style.top =
-            '0';
-
-        box.style.left =
-            '0';
-
-        box.style.right =
-            '0';
-
-        box.style.height =
-            '92px';
-
-        box.style.zIndex =
-            '999999';
-
-        box.style.display =
-            'none';
-
-        box.style.alignItems =
-            'center';
-
-        box.style.justifyContent =
-            'center';
-
-        box.style.padding =
-            '0 20px';
-
-        box.style.boxSizing =
-            'border-box';
-
-        box.style.background =
-            'rgba(12,12,12,0.97)';
-
-        box.style.boxShadow =
-            '0 8px 30px rgba(0,0,0,0.45)';
-
-        box.style.pointerEvents =
-            'none';
-
-
-        /* =================================================
-           КНОПКИ
-           ================================================= */
-
-        for (
-            var i = 0;
-            i < items.length;
-            i++
-        ) {
-
-            var button =
-                document.createElement('div');
-
-
-            button.innerHTML =
-                items[i];
-
-
-            button.style.color =
-                '#ffffff';
-
-
-            button.style.fontSize =
-                '20px';
-
-
-            button.style.fontWeight =
-                '600';
-
-
-            button.style.padding =
-                '14px 22px';
-
-
-            button.style.margin =
-                '0 2px';
-
-
-            button.style.borderRadius =
-                '8px';
-
-
-            button.style.whiteSpace =
-                'nowrap';
-
-
-            button.style.opacity =
-                '0.55';
-
-
-            button.style.transform =
-                'scale(1)';
-
-
-            button.style.transition =
-                'all .16s ease';
-
-
-            box.appendChild(
-                button
-            );
-
-
-            buttons.push(
-                button
-            );
-        }
-
-
-        document.body.appendChild(
-            box
-        );
-
-
-        draw();
-    }
-
-
-    /* =====================================================
-       ОТРИСОВКА
-       ===================================================== */
-
-    function draw() {
-
-        if (!box) return;
-
-
-        box.style.display =
-            visible ? 'flex' : 'none';
-
-
-        for (
-            var i = 0;
-            i < buttons.length;
-            i++
-        ) {
-
-            if (i === selected) {
-
-                buttons[i].style.background =
-                    'rgba(255,255,255,0.18)';
-
-                buttons[i].style.opacity =
-                    '1';
-
-                buttons[i].style.transform =
-                    'scale(1.08)';
-
-            } else {
-
-                buttons[i].style.background =
-                    'transparent';
-
-                buttons[i].style.opacity =
-                    '0.55';
-
-                buttons[i].style.transform =
-                    'scale(1)';
-            }
-        }
-    }
-
-
-    /* =====================================================
-       ОТКРЫТЬ
-       ===================================================== */
-
-    function openNav() {
-
-        if (visible) return;
-
-        visible = true;
-
-        draw();
-    }
-
-
-    /* =====================================================
-       ЗАКРЫТЬ
-       ===================================================== */
-
-    function closeNav() {
-
-        if (!visible) return;
-
-        visible = false;
-
-        draw();
-    }
-
-
-    /* =====================================================
-       ВЛЕВО
-       ===================================================== */
-
-    function left() {
-
-        if (!visible) return;
-
-
-        if (selected > 0) {
-
-            selected--;
-
-            draw();
-        }
-    }
-
-
-    /* =====================================================
-       ВПРАВО
-       ===================================================== */
-
-    function right() {
-
-        if (!visible) return;
-
-
-        if (
-            selected <
-            items.length - 1
-        ) {
-
-            selected++;
-
-            draw();
-        }
-    }
-
-
-    /* =====================================================
-       ПЕРЕХОД ЧЕРЕЗ ШТАТНОЕ МЕНЮ LAMPA
-       ===================================================== */
-
-    function executeOfficialMenu(action) {
-
-        try {
-
-            var menu = null;
-
-
-            try {
-
-                menu =
-                    Lampa.Menu.render();
-
-            } catch (e) {}
 
 
             /*
-             * Если меню ещё не существует —
-             * открываем штатное меню и повторяем.
+             * =================================================
+             * НАШИ КНОПКИ
+             * =================================================
              */
 
-            if (
-                !menu ||
-                !menu.length
-            ) {
+            .oritv-v4-item {
+                display: flex !important;
 
-                try {
+                align-items: center !important;
+                justify-content: center !important;
 
-                    if (Lampa.Menu.open) {
+                flex: 0 0 auto !important;
 
-                        Lampa.Menu.open();
-                    }
+                width: auto !important;
+                min-width: 0 !important;
 
-                } catch (e) {}
+                height: 44px !important;
 
+                padding: 0 13px !important;
 
-                setTimeout(
-                    function () {
+                margin: 0 !important;
 
-                        executeOfficialMenu(
-                            action
-                        );
+                border-radius: 8px !important;
 
-                    },
-                    120
-                );
+                box-sizing: border-box !important;
 
-                return;
+                background: transparent !important;
+
+                color: rgba(255,255,255,.84) !important;
+
+                font-family: Arial, sans-serif !important;
+
+                font-size: 16px !important;
+
+                font-weight: 600 !important;
+
+                line-height: 44px !important;
+
+                white-space: nowrap !important;
+
+                opacity: .86 !important;
+
+                z-index: 1000000 !important;
             }
 
 
-            /* =============================================
-               ИЩЕМ НУЖНЫЙ ПУНКТ
-               ============================================= */
+            /*
+             * =================================================
+             * ФОКУС
+             * =================================================
+             */
 
-            var item = null;
+            .oritv-v4-item.focus {
+                color: #ffffff !important;
 
+                background: rgba(255,255,255,.20) !important;
 
-            try {
+                opacity: 1 !important;
 
-                item =
-                    menu.find(
-                        '.menu__item[data-action="' +
-                        action +
-                        '"]'
-                    );
+                transform: scale(1.05) !important;
 
-            } catch (e) {}
-
-
-            if (
-                !item ||
-                !item.length
-            ) {
-
-                try {
-
-                    item =
-                        $(
-                            '.menu__item[data-action="' +
-                            action +
-                            '"]'
-                        );
-
-                } catch (e) {}
+                box-shadow:
+                    0 2px 10px rgba(0,0,0,.20) !important;
             }
 
 
-            /* =============================================
-               ЕСЛИ НЕ НАШЛИ
-               ============================================= */
+            /*
+             * =================================================
+             * ПОИСК И НАСТРОЙКИ
+             * =================================================
+             */
 
-            if (
-                !item ||
-                !item.length
-            ) {
+            .head__actions .open--search,
+            .head__actions .open--settings {
 
-                notify(
-                    'ПУНКТ НЕ НАЙДЕН: ' +
-                    action
-                );
+                display: flex !important;
 
-                return;
+                visibility: visible !important;
+
+                opacity: 1 !important;
             }
 
 
-            /* =============================================
-               ПЕРЕКЛЮЧАЕМ ШТАТНЫЙ CONTROLLER
-               ============================================= */
+            /*
+             * =================================================
+             * БОЛЬШОЙ ЭКРАН
+             * =================================================
+             */
 
-            try {
+            @media (min-width: 1600px) {
 
-                Lampa.Controller.toggle(
-                    'menu'
-                );
+                .oritv-v4-container {
+                    gap: 6px !important;
+                }
 
-            } catch (e) {}
+                .oritv-v4-item {
+                    padding-left: 16px !important;
+                    padding-right: 16px !important;
 
-
-            /* =============================================
-               ПЕРЕДАЁМ ФОКУС
-               ============================================= */
-
-            try {
-
-                Lampa.Controller.collectionFocus(
-                    item,
-                    menu,
-                    true
-                );
-
-            } catch (e) {
-
-                try {
-
-                    Lampa.Controller.collectionFocus(
-                        item,
-                        menu
-                    );
-
-                } catch (e) {}
+                    font-size: 18px !important;
+                }
             }
 
 
-            /* =============================================
-               ШТАТНЫЙ ENTER
-               ============================================= */
+            /*
+             * =================================================
+             * МАЛЕНЬКИЙ ЭКРАН
+             * =================================================
+             */
 
-            setTimeout(
-                function () {
+            @media (max-width: 1200px) {
 
-                    try {
+                .oritv-v4-container {
+                    gap: 1px !important;
 
-                        Lampa.Controller.enter();
+                    max-width: 60vw !important;
+                }
 
-                    } catch (e) {
+                .oritv-v4-item {
+                    padding-left: 8px !important;
+                    padding-right: 8px !important;
 
-                        /*
-                         * Запасной вариант
-                         */
+                    font-size: 14px !important;
+                }
+            }
 
-                        try {
+        `;
 
-                            item.trigger(
-                                'hover:enter'
-                            );
+        document.head.appendChild(style);
+    }
 
-                        } catch (ee) {
 
-                            notify(
-                                'ENTER: ' +
-                                ee.message
-                            );
-                        }
-                    }
+    /* =========================================================
+       ЖЁСТКО СКРЫВАЕМ ЛИШНЕЕ
+       ========================================================= */
 
-                },
-                80
+    function hideElement(element) {
+
+        if (!element) {
+            return;
+        }
+
+        try {
+
+            element.style.setProperty(
+                'display',
+                'none',
+                'important'
+            );
+
+            element.style.setProperty(
+                'visibility',
+                'hidden',
+                'important'
             );
 
         } catch (e) {
 
-            notify(
-                'MENU: ' +
-                e.message
-            );
+            try {
+                element.style.display = 'none';
+            } catch (ee) {}
         }
     }
 
 
-    /* =====================================================
+    /* =========================================================
+       ПРОВЕРКА — ПОИСК
+       ========================================================= */
+
+    function isSearch(element) {
+
+        if (!element) {
+            return false;
+        }
+
+        var cls =
+            typeof element.className === 'string'
+                ? element.className
+                : '';
+
+        if (
+            cls.indexOf('open--search') !== -1
+        ) {
+            return true;
+        }
+
+        try {
+
+            if (
+                element.querySelector(
+                    '.open--search'
+                )
+            ) {
+                return true;
+            }
+
+        } catch (e) {}
+
+        /*
+         * Дополнительная проверка SVG.
+         */
+
+        try {
+
+            var use =
+                element.querySelector(
+                    'use'
+                );
+
+            if (use) {
+
+                var href =
+                    use.getAttribute(
+                        'xlink:href'
+                    ) ||
+                    use.getAttribute(
+                        'href'
+                    ) ||
+                    '';
+
+                if (
+                    href.indexOf('search') !== -1
+                ) {
+                    return true;
+                }
+            }
+
+        } catch (e) {}
+
+        return false;
+    }
+
+
+    /* =========================================================
+       ПРОВЕРКА — НАСТРОЙКИ
+       ========================================================= */
+
+    function isSettings(element) {
+
+        if (!element) {
+            return false;
+        }
+
+        var cls =
+            typeof element.className === 'string'
+                ? element.className
+                : '';
+
+        if (
+            cls.indexOf('open--settings') !== -1
+        ) {
+            return true;
+        }
+
+        try {
+
+            if (
+                element.querySelector(
+                    '.open--settings'
+                )
+            ) {
+                return true;
+            }
+
+        } catch (e) {}
+
+        /*
+         * Дополнительная проверка SVG.
+         */
+
+        try {
+
+            var use =
+                element.querySelector(
+                    'use'
+                );
+
+            if (use) {
+
+                var href =
+                    use.getAttribute(
+                        'xlink:href'
+                    ) ||
+                    use.getAttribute(
+                        'href'
+                    ) ||
+                    '';
+
+                if (
+                    href.indexOf('settings') !== -1 ||
+                    href.indexOf('setting') !== -1
+                ) {
+                    return true;
+                }
+            }
+
+        } catch (e) {}
+
+        return false;
+    }
+
+
+    /* =========================================================
+       ОЧИСТКА HEAD
+       ========================================================= */
+
+    function cleanHead() {
+
+        var body =
+            document.querySelector(
+                '.head__body'
+            );
+
+        if (!body) {
+            return;
+        }
+
+
+        /*
+         * =====================================================
+         * УБИРАЕМ ЧАСЫ
+         * =====================================================
+         */
+
+        var times =
+            body.querySelectorAll(
+                '.head__time, .head__markers'
+            );
+
+        for (
+            var i = 0;
+            i < times.length;
+            i++
+        ) {
+
+            hideElement(
+                times[i]
+            );
+        }
+
+
+        /*
+         * =====================================================
+         * УБИРАЕМ ИНДИКАТОРЫ / FPS
+         * =====================================================
+         */
+
+        var extra =
+            body.querySelectorAll(
+                '.head__fps, .head__status'
+            );
+
+        for (
+            var j = 0;
+            j < extra.length;
+            j++
+        ) {
+
+            hideElement(
+                extra[j]
+            );
+        }
+
+
+        /*
+         * =====================================================
+         * ОЧИЩАЕМ ACTIONS
+         * =====================================================
+         */
+
+        var actions =
+            body.querySelector(
+                '.head__actions'
+            );
+
+        if (!actions) {
+            return;
+        }
+
+
+        var children =
+            Array.prototype.slice.call(
+                actions.children
+            );
+
+
+        for (
+            var k = 0;
+            k < children.length;
+            k++
+        ) {
+
+            var child =
+                children[k];
+
+
+            /*
+             * НАШУ НАВИГАЦИЮ НЕ ТРОГАЕМ
+             */
+
+            if (
+                child.classList.contains(
+                    'oritv-v4-container'
+                )
+            ) {
+                continue;
+            }
+
+
+            /*
+             * ОСТАВЛЯЕМ ПОИСК
+             */
+
+            if (isSearch(child)) {
+
+                child.style.setProperty(
+                    'display',
+                    'flex',
+                    'important'
+                );
+
+                child.style.setProperty(
+                    'visibility',
+                    'visible',
+                    'important'
+                );
+
+                continue;
+            }
+
+
+            /*
+             * ОСТАВЛЯЕМ НАСТРОЙКИ
+             */
+
+            if (isSettings(child)) {
+
+                child.style.setProperty(
+                    'display',
+                    'flex',
+                    'important'
+                );
+
+                child.style.setProperty(
+                    'visibility',
+                    'visible',
+                    'important'
+                );
+
+                continue;
+            }
+
+
+            /*
+             * ВСЁ ОСТАЛЬНОЕ УДАЛЯЕМ
+             */
+
+            try {
+
+                child.remove();
+
+            } catch (e) {
+
+                hideElement(child);
+
+            }
+        }
+    }
+
+
+    /* =========================================================
+       НАЙТИ ШТАТНЫЙ ПУНКТ LAMPA
+       ========================================================= */
+
+    function findMenuItem(action) {
+
+        try {
+
+            return document.querySelector(
+                '.menu__item[data-action="' +
+                action +
+                '"]'
+            );
+
+        } catch (e) {
+
+            return null;
+        }
+    }
+
+
+    /* =========================================================
+       АКТИВАЦИЯ ШТАТНОГО ПУНКТА
+       ========================================================= */
+
+    function activateMenuItem(element) {
+
+        if (!element) {
+            return false;
+        }
+
+        try {
+
+            if (
+                window.jQuery &&
+                window.jQuery.fn &&
+                window.jQuery.fn.trigger
+            ) {
+
+                window.jQuery(element)
+                    .trigger(
+                        'hover:enter'
+                    );
+
+                return true;
+            }
+
+        } catch (e) {}
+
+
+        try {
+
+            element.dispatchEvent(
+                new CustomEvent(
+                    'hover:enter',
+                    {
+                        bubbles: true,
+                        cancelable: true
+                    }
+                )
+            );
+
+            return true;
+
+        } catch (e) {
+
+            return false;
+        }
+    }
+
+
+    /* =========================================================
        ИСТОРИЯ
-       ===================================================== */
+       ========================================================= */
 
     function openHistory() {
 
@@ -531,11 +652,50 @@
                         }
                     );
 
-                } catch (e) {
+                } catch (e) {}
 
-                    notify(
-                        'ИСТОРИЯ: ' +
-                        e.message
+            },
+            250
+        );
+    }
+
+
+    /* =========================================================
+       ВЫПОЛНЕНИЕ
+       ========================================================= */
+
+    function execute(action) {
+
+        if (action === 'history') {
+
+            openHistory();
+
+            return;
+        }
+
+
+        var item =
+            findMenuItem(action);
+
+
+        if (item) {
+
+            activateMenuItem(item);
+
+            return;
+        }
+
+
+        setTimeout(
+            function () {
+
+                var retry =
+                    findMenuItem(action);
+
+                if (retry) {
+
+                    activateMenuItem(
+                        retry
                     );
                 }
 
@@ -545,256 +705,246 @@
     }
 
 
-    /* =====================================================
-       OK
-       ===================================================== */
+    /* =========================================================
+       СОЗДАНИЕ КНОПКИ
+       ========================================================= */
 
-    function ok() {
+    function createButton(item) {
 
-        if (!visible) return;
+        var button = $(
+            '<div class="' +
+            'head__action ' +
+            'selector ' +
+            'oritv-v4-item">' +
+            '</div>'
+        );
 
 
-        var action =
-            actions[selected];
+        button.text(
+            item.title
+        );
+
+
+        button.attr(
+            'data-oritv-action',
+            item.action
+        );
+
+
+        button.on(
+            'hover:enter',
+            function () {
+
+                execute(
+                    item.action
+                );
+
+            }
+        );
+
+
+        button.on(
+            'click',
+            function () {
+
+                execute(
+                    item.action
+                );
+
+            }
+        );
+
+
+        return button;
+    }
+
+
+    /* =========================================================
+       УСТАНОВКА
+       ========================================================= */
+
+    function install() {
+
+        var head =
+            document.querySelector(
+                '.head'
+            );
+
+        if (!head) {
+            return false;
+        }
+
+
+        var actions =
+            head.querySelector(
+                '.head__actions'
+            );
+
+        if (!actions) {
+            return false;
+        }
+
+
+        addStyle();
 
 
         /*
-         * Сначала закрываем нашу шторку.
+         * СНАЧАЛА УБИРАЕМ ЛИШНЕЕ
          */
 
-        closeNav();
+        cleanHead();
 
 
         /*
-         * История
+         * Если уже установлено —
+         * просто ещё раз чистим.
          */
 
         if (
-            action === 'history'
+            head.querySelector(
+                '.oritv-v4-container'
+            )
         ) {
 
-            openHistory();
+            installed = true;
 
+            return true;
+        }
+
+
+        /*
+         * =====================================================
+         * СОЗДАЁМ НАВИГАЦИЮ
+         * =====================================================
+         */
+
+        var container =
+            document.createElement(
+                'div'
+            );
+
+
+        container.className =
+            'oritv-v4-container';
+
+
+        for (
+            var i = 0;
+            i < ITEMS.length;
+            i++
+        ) {
+
+            var button =
+                createButton(
+                    ITEMS[i]
+                );
+
+            container.appendChild(
+                button[0]
+            );
+        }
+
+
+        /*
+         * =====================================================
+         * ВСТАВЛЯЕМ В HEAD
+         * ===================================================== */
+
+        try {
+
+            actions.appendChild(
+                container
+            );
+
+        } catch (e) {
+
+            return false;
+        }
+
+
+        /*
+         * Ещё раз чистим.
+         */
+
+        cleanHead();
+
+
+        installed = true;
+
+        return true;
+    }
+
+
+    /* =========================================================
+       НАБЛЮДЕНИЕ ЗА LAMPA
+       ========================================================= */
+
+    function startObserver() {
+
+        if (
+            typeof MutationObserver ===
+            'undefined'
+        ) {
             return;
         }
 
 
-        /*
-         * Остальные разделы —
-         * через родное меню Lampa.
-         */
+        var observer =
+            new MutationObserver(
+                function () {
 
-        executeOfficialMenu(
-            action
+                    cleanHead();
+
+                }
+            );
+
+
+        observer.observe(
+            document.body,
+            {
+                childList: true,
+                subtree: true
+            }
         );
     }
 
 
-    /* =====================================================
-       ТЕКУЩИЙ CONTROLLER
-       ===================================================== */
+    /* =========================================================
+       ЗАПУСК
+       ========================================================= */
 
-    function controllerName() {
-
-        try {
-
-            if (
-                !Lampa.Controller ||
-                !Lampa.Controller.enabled
-            ) {
-
-                return '';
-            }
+    startObserver();
 
 
-            var controller =
-                Lampa.Controller.enabled();
+    var attempts = 0;
 
 
-            if (!controller) {
-                return '';
-            }
+    var timer =
+        setInterval(
+            function () {
+
+                attempts++;
 
 
-            if (controller.name) {
-                return controller.name;
-            }
+                if (install()) {
 
-
-            if (controller._name) {
-                return controller._name;
-            }
-
-        } catch (e) {}
-
-
-        return '';
-    }
-
-
-    /* =====================================================
-       ПРОВЕРКА HEAD
-       ===================================================== */
-
-    function checkHead() {
-
-        var name =
-            controllerName();
-
-
-        /*
-         * Только когда Lampa находится
-         * в контроллере HEAD —
-         * показываем OriTV.
-         */
-
-        if (
-            name === 'head'
-        ) {
-
-            openNav();
-
-        } else {
-
-            if (visible) {
-
-                closeNav();
-            }
-        }
-    }
-
-
-    /* =====================================================
-       КЛАВИАТУРА / ПУЛЬТ
-       ===================================================== */
-
-    document.addEventListener(
-        'keydown',
-        function (event) {
-
-            /*
-             * КЛЮЧЕВО:
-             *
-             * Когда OriTV скрыт,
-             * мы вообще НЕ вмешиваемся
-             * в управление Lampa.
-             */
-
-            if (!visible) {
-                return;
-            }
-
-
-            var code =
-                event.keyCode;
-
-
-            /* =============================================
-               LEFT
-               ============================================= */
-
-            if (code === 37) {
-
-                left();
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-                return;
-            }
-
-
-            /* =============================================
-               RIGHT
-               ============================================= */
-
-            if (code === 39) {
-
-                right();
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-                return;
-            }
-
-
-            /* =============================================
-               OK
-               ============================================= */
-
-            if (code === 13) {
-
-                ok();
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-                return;
-            }
-
-
-            /* =============================================
-               DOWN
-               ============================================= */
-
-            if (code === 40) {
-
-                closeNav();
-
-
-                try {
-
-                    Lampa.Controller.toggle(
-                        'content'
+                    clearInterval(
+                        timer
                     );
 
-                } catch (e) {}
+                    return;
+                }
 
 
-                event.preventDefault();
+                if (attempts >= 150) {
 
-                event.stopPropagation();
+                    clearInterval(
+                        timer
+                    );
+                }
 
-                return;
-            }
-
-
-            /* =============================================
-               UP
-               ============================================= */
-
-            if (code === 38) {
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-                return;
-            }
-
-        },
-        true
-    );
-
-
-    /* =====================================================
-       СОЗДАЁМ
-       ===================================================== */
-
-    create();
-
-
-    /* =====================================================
-       СЛЕДИМ ЗА CONTROLLER
-       ===================================================== */
-
-    setInterval(
-        checkHead,
-        100
-    );
+            },
+            200
+        );
 
 })();
