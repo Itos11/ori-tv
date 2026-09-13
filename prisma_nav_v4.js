@@ -39,16 +39,13 @@
 
             .prisma-v4-container {
                 position: absolute !important;
-
                 left: 50% !important;
-                top: 0 !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
 
-                transform: translateX(-50%) !important;
-
-                height: 60px !important;
+                height: auto !important;
 
                 display: flex !important;
-
                 align-items: center !important;
                 justify-content: center !important;
 
@@ -56,21 +53,28 @@
                 flex-wrap: nowrap !important;
 
                 gap: 4px !important;
-
-                padding: 0 !important;
+                padding: 10px !important;
                 margin: 0 !important;
 
                 width: max-content !important;
-
-                max-width: 58vw !important;
+                max-width: 70vw !important;
 
                 box-sizing: border-box !important;
-
                 overflow: visible !important;
-
                 white-space: nowrap !important;
 
                 z-index: 999999 !important;
+
+                background: rgba(22,22,24,.94) !important;
+                border: 1px solid rgba(255,255,255,.08) !important;
+                border-radius: 18px !important;
+
+                box-shadow:
+                    0 18px 60px rgba(0,0,0,.60),
+                    0 4px 20px rgba(0,0,0,.35) !important;
+
+                backdrop-filter: blur(22px) !important;
+                -webkit-backdrop-filter: blur(22px) !important;
             }
 
 
@@ -82,42 +86,36 @@
 
             .prisma-v4-item {
                 display: flex !important;
-
                 align-items: center !important;
                 justify-content: center !important;
-
                 flex: 0 0 auto !important;
 
                 width: auto !important;
                 min-width: 0 !important;
 
-                height: 44px !important;
-
-                padding: 0 13px !important;
-
+                height: 46px !important;
+                padding: 0 17px !important;
                 margin: 0 !important;
 
-                border-radius: 8px !important;
-
+                border-radius: 12px !important;
                 box-sizing: border-box !important;
 
                 background: transparent !important;
-
-                color: rgba(255,255,255,.84) !important;
+                color: rgba(255,255,255,.62) !important;
 
                 font-family: Arial, sans-serif !important;
-
-                font-size: 16px !important;
-
-                font-weight: 600 !important;
-
-                line-height: 44px !important;
+                font-size: 15px !important;
+                font-weight: 500 !important;
+                line-height: 46px !important;
 
                 white-space: nowrap !important;
-
-                opacity: .86 !important;
-
+                opacity: 1 !important;
                 z-index: 1000000 !important;
+
+                transition:
+                    transform .18s ease,
+                    background .18s ease,
+                    color .18s ease !important;
             }
 
 
@@ -129,15 +127,13 @@
 
             .prisma-v4-item.focus {
                 color: #ffffff !important;
-
-                background: rgba(255,255,255,.20) !important;
-
+                background: rgba(255,255,255,.16) !important;
                 opacity: 1 !important;
-
-                transform: scale(1.05) !important;
+                transform: scale(1.04) !important;
 
                 box-shadow:
-                    0 2px 10px rgba(0,0,0,.20) !important;
+                    0 4px 18px rgba(0,0,0,.25),
+                    inset 0 1px rgba(255,255,255,.08) !important;
             }
 
 
