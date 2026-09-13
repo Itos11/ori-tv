@@ -1,8 +1,8 @@
 (function () {
     'use strict';
 
-    if (window.ORITV_PRISMA_UI_V4) return;
-    window.ORITV_PRISMA_UI_V4 = true;
+    if (window.ORITV_PRISMA_FINAL) return;
+    window.ORITV_PRISMA_FINAL = true;
 
     var ITEMS = [
         {
@@ -57,9 +57,9 @@
     ];
 
     var nav = null;
-    var buttons = [];
-    var current = 0;
-    var timer = null;
+    var installed = false;
+    var current = 1;
+
 
     /*
      * =========================================================
@@ -69,401 +69,224 @@
 
     function addStyle() {
 
-        if (document.getElementById('oritv-prisma-style-v4')) {
+        if (document.getElementById('oritv-prisma-final-style')) {
             return;
         }
 
         var style = document.createElement('style');
 
-        style.id = 'oritv-prisma-style-v4';
+        style.id = 'oritv-prisma-final-style';
 
         style.textContent = `
 
-.oritv-prisma-nav {
+        .oritv-prisma-nav {
+            position: absolute !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
 
-    position: fixed !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
 
-    top: 8px !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
 
-    left: 50% !important;
+            gap: 4px !important;
+            padding: 4px !important;
+            margin: 0 !important;
 
-    transform: translateX(-50%) !important;
+            width: max-content !important;
+            max-width: 70vw !important;
 
-    z-index: 9999999 !important;
+            height: 52px !important;
 
-    height: 52px !important;
+            box-sizing: border-box !important;
+            overflow: visible !important;
+            white-space: nowrap !important;
 
-    display: flex !important;
+            z-index: 999999 !important;
 
-    align-items: center !important;
+            background: rgba(39,40,42,.96) !important;
+            border: 1px solid rgba(255,255,255,.07) !important;
+            border-radius: 28px !important;
 
-    justify-content: center !important;
+            box-shadow:
+                0 5px 22px rgba(0,0,0,.35),
+                inset 0 1px 0 rgba(255,255,255,.035) !important;
 
-    padding: 4px !important;
+            backdrop-filter: blur(18px) saturate(120%) !important;
+            -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
+        }
 
-    margin: 0 !important;
 
-    width: max-content !important;
+        .oritv-prisma-item {
+            position: relative !important;
 
-    max-width: calc(100vw - 260px) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
 
-    box-sizing: border-box !important;
+            flex: 0 0 auto !important;
 
-    background:
-        rgba(39,40,42,.96) !important;
+            width: auto !important;
+            min-width: 0 !important;
 
-    border:
-        1px solid rgba(255,255,255,.07) !important;
+            height: 44px !important;
 
-    border-radius:
-        28px !important;
+            padding: 0 15px !important;
+            margin: 0 !important;
 
-    box-shadow:
-        0 5px 22px rgba(0,0,0,.35),
-        inset 0 1px 0 rgba(255,255,255,.035) !important;
+            border-radius: 23px !important;
 
-    backdrop-filter:
-        blur(18px) saturate(120%) !important;
+            box-sizing: border-box !important;
 
-    -webkit-backdrop-filter:
-        blur(18px) saturate(120%) !important;
+            background: transparent !important;
+            color: rgba(255,255,255,.68) !important;
 
-    overflow:
-        visible !important;
+            font-family: Arial,sans-serif !important;
+            font-size: 16px !important;
+            font-weight: 500 !important;
+            line-height: 44px !important;
 
-    white-space:
-        nowrap !important;
-}
+            white-space: nowrap !important;
 
+            opacity: 1 !important;
+            z-index: 1000000 !important;
 
-.oritv-prisma-item {
+            cursor: pointer !important;
 
-    position: relative !important;
+            transition:
+                background .15s ease,
+                color .15s ease,
+                transform .15s ease !important;
+        }
 
-    display: flex !important;
 
-    align-items: center !important;
+        .oritv-prisma-item svg {
+            width: 19px !important;
+            height: 19px !important;
 
-    justify-content: center !important;
+            margin-right: 7px !important;
 
-    height: 44px !important;
+            flex: 0 0 auto !important;
 
-    padding:
-        0 15px !important;
+            fill: none !important;
+            stroke: currentColor !important;
+            stroke-width: 1.65 !important;
+            stroke-linecap: round !important;
+            stroke-linejoin: round !important;
+        }
 
-    margin:
-        0 !important;
 
-    border-radius:
-        23px !important;
+        .oritv-prisma-text {
+            display: inline-block !important;
 
-    box-sizing:
-        border-box !important;
+            color: inherit !important;
+            font-size: inherit !important;
+            font-weight: inherit !important;
+            line-height: inherit !important;
+        }
 
-    flex:
-        0 0 auto !important;
 
-    width: auto !important;
+        .oritv-prisma-item.oritv-active,
+        .oritv-prisma-item.focus {
+            color: #fff !important;
+            background: rgba(255,255,255,.14) !important;
+            transform: none !important;
+        }
 
-    min-width: 0 !important;
 
-    color:
-        rgba(255,255,255,.68) !important;
+        .oritv-prisma-item.focus {
+            transform: scale(1.03) !important;
+        }
 
-    background:
-        transparent !important;
 
-    font-family:
-        Arial, sans-serif !important;
+        .oritv-prisma-item.oritv-active::after {
+            content: "" !important;
 
-    font-size:
-        16px !important;
+            position: absolute !important;
 
-    font-weight:
-        500 !important;
+            left: 50% !important;
+            bottom: 2px !important;
 
-    line-height:
-        44px !important;
+            transform: translateX(-50%) !important;
 
-    white-space:
-        nowrap !important;
+            width: 23px !important;
+            height: 3px !important;
 
-    cursor:
-        pointer !important;
+            border-radius: 3px !important;
 
-    opacity:
-        1 !important;
+            background: #48f4c4 !important;
 
-    transition:
-        background .15s ease,
-        color .15s ease,
-        transform .15s ease !important;
-}
+            box-shadow:
+                0 0 8px rgba(72,244,196,.45) !important;
+        }
 
 
-.oritv-prisma-item svg {
+        .head__time,
+        .head__markers,
+        .head__fps,
+        .head__status {
+            display: none !important;
+            visibility: hidden !important;
+        }
 
-    width:
-        19px !important;
 
-    height:
-        19px !important;
+        .head__actions .open--search {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
 
-    margin-right:
-        7px !important;
 
-    flex:
-        0 0 auto !important;
+        .head__actions .open--settings {
+            display: none !important;
+            visibility: hidden !important;
+        }
 
-    fill:
-        none !important;
 
-    stroke:
-        currentColor !important;
+        @media (min-width: 1600px) {
 
-    stroke-width:
-        1.65 !important;
+            .oritv-prisma-nav {
+                height: 54px !important;
+                border-radius: 29px !important;
+            }
 
-    stroke-linecap:
-        round !important;
+            .oritv-prisma-item {
+                height: 46px !important;
+                padding: 0 17px !important;
+                font-size: 17px !important;
+            }
 
-    stroke-linejoin:
-        round !important;
-}
+            .oritv-prisma-item svg {
+                width: 20px !important;
+                height: 20px !important;
+            }
+        }
 
 
-.oritv-prisma-text {
+        @media (max-width: 1200px) {
 
-    display:
-        inline-block !important;
+            .oritv-prisma-nav {
+                max-width: 60vw !important;
+                height: 48px !important;
+            }
 
-    color:
-        inherit !important;
+            .oritv-prisma-item {
+                height: 40px !important;
+                padding: 0 10px !important;
+                font-size: 14px !important;
+            }
 
-    font-size:
-        inherit !important;
+            .oritv-prisma-item svg {
+                width: 17px !important;
+                height: 17px !important;
+                margin-right: 5px !important;
+            }
+        }
 
-    font-weight:
-        inherit !important;
-
-    line-height:
-        inherit !important;
-}
-
-
-.oritv-prisma-item.oritv-active {
-
-    color:
-        #ffffff !important;
-
-    background:
-        rgba(255,255,255,.14) !important;
-
-    transform:
-        none !important;
-}
-
-
-.oritv-prisma-item.focus,
-.oritv-prisma-item:focus {
-
-    color:
-        #ffffff !important;
-
-    background:
-        rgba(255,255,255,.14) !important;
-
-}
-
-
-.oritv-prisma-item.oritv-active::after {
-
-    content:
-        "" !important;
-
-    position:
-        absolute !important;
-
-    left:
-        50% !important;
-
-    bottom:
-        2px !important;
-
-    transform:
-        translateX(-50%) !important;
-
-    width:
-        23px !important;
-
-    height:
-        3px !important;
-
-    border-radius:
-        3px !important;
-
-    background:
-        #48f4c4 !important;
-
-    box-shadow:
-        0 0 8px rgba(72,244,196,.45) !important;
-}
-
-
-/*
- * LAMPA HEADER
- */
-
-.head__time,
-.head__markers,
-.head__fps,
-.head__status {
-
-    display:
-        none !important;
-
-    visibility:
-        hidden !important;
-}
-
-
-/*
- * SEARCH
- */
-
-.head__actions .open--search {
-
-    display:
-        flex !important;
-
-    visibility:
-        visible !important;
-
-    opacity:
-        1 !important;
-}
-
-
-/*
- * NATIVE SETTINGS
- */
-
-.head__actions .open--settings {
-
-    display:
-        none !important;
-
-    visibility:
-        hidden !important;
-}
-
-
-/*
- * НАША ШТОРКА ВНУТРИ HEAD
- */
-
-.head__actions .oritv-prisma-nav {
-
-    display:
-        flex !important;
-
-    visibility:
-        visible !important;
-
-    opacity:
-        1 !important;
-}
-
-
-/*
- * КОГДА HEAD LAMPA СКРЫВАЕТСЯ —
- * НАША ШТОРКА ОСТАЁТСЯ ВИДИМОЙ
- */
-
-.oritv-prisma-nav {
-
-    visibility:
-        visible !important;
-
-    opacity:
-        1 !important;
-}
-
-
-@media (min-width: 1600px) {
-
-    .oritv-prisma-nav {
-
-        height:
-            54px !important;
-
-        padding:
-            4px !important;
-
-        border-radius:
-            29px !important;
-    }
-
-    .oritv-prisma-item {
-
-        height:
-            46px !important;
-
-        padding:
-            0 17px !important;
-
-        font-size:
-            17px !important;
-    }
-
-    .oritv-prisma-item svg {
-
-        width:
-            20px !important;
-
-        height:
-            20px !important;
-    }
-}
-
-
-@media (max-width: 1200px) {
-
-    .oritv-prisma-nav {
-
-        max-width:
-            calc(100vw - 180px) !important;
-
-        height:
-            48px !important;
-    }
-
-    .oritv-prisma-item {
-
-        height:
-            40px !important;
-
-        padding:
-            0 10px !important;
-
-        font-size:
-            14px !important;
-    }
-
-    .oritv-prisma-item svg {
-
-        width:
-            17px !important;
-
-        height:
-            17px !important;
-
-        margin-right:
-            5px !important;
-    }
-}
-
-`;
+        `;
 
         document.head.appendChild(style);
     }
@@ -471,17 +294,15 @@
 
     /*
      * =========================================================
-     * FIND MENU ITEM
+     * FIND LAMPA MENU ITEM
      * =========================================================
      */
 
     function findMenuItem(action) {
 
-        var item = null;
-
         try {
 
-            item =
+            var item =
                 document.querySelector(
                     '.menu__item[data-action="' +
                     action +
@@ -494,103 +315,21 @@
 
         } catch (e) {}
 
-
-        var words = {
-
-            main: [
-                'главная',
-                'главн'
-            ],
-
-            movie: [
-                'фильмы',
-                'фильм'
-            ],
-
-            tv: [
-                'сериалы',
-                'сериал'
-            ],
-
-            history: [
-                'история',
-                'history'
-            ],
-
-            settings: [
-                'настройки',
-                'настрой'
-            ]
-
-        };
-
-
-        var list =
-            words[action] || [];
-
-
-        try {
-
-            var nodes =
-                document.querySelectorAll(
-                    '.menu__item'
-                );
-
-
-            for (
-                var i = 0;
-                i < nodes.length;
-                i++
-            ) {
-
-                var text =
-                    (
-                        nodes[i].textContent ||
-                        ''
-                    )
-                    .trim()
-                    .toLowerCase();
-
-
-                for (
-                    var j = 0;
-                    j < list.length;
-                    j++
-                ) {
-
-                    if (
-                        text.indexOf(
-                            list[j]
-                        ) !== -1
-                    ) {
-
-                        return nodes[i];
-
-                    }
-
-                }
-
-            }
-
-        } catch (e) {}
-
-
         return null;
     }
 
 
     /*
      * =========================================================
-     * ACTIVATE
+     * ACTIVATE LAMPA MENU
      * =========================================================
      */
 
-    function activate(element) {
+    function activateMenuItem(element) {
 
         if (!element) {
             return false;
         }
-
 
         try {
 
@@ -601,15 +340,12 @@
             ) {
 
                 window.jQuery(element)
-                    .trigger(
-                        'hover:enter'
-                    );
+                    .trigger('hover:enter');
 
                 return true;
             }
 
         } catch (e) {}
-
 
         try {
 
@@ -626,7 +362,6 @@
             return true;
 
         } catch (e) {}
-
 
         return false;
     }
@@ -646,13 +381,10 @@
                 Lampa.Favorite &&
                 Lampa.Favorite.read
             ) {
-
                 Lampa.Favorite.read();
-
             }
 
         } catch (e) {}
-
 
         setTimeout(
             function () {
@@ -689,14 +421,12 @@
 
         var settings = null;
 
-
         try {
 
             settings =
                 document.querySelector(
                     '.head__actions .open--settings'
                 );
-
 
             if (!settings) {
 
@@ -709,30 +439,12 @@
 
         } catch (e) {}
 
-
         if (settings) {
 
-            activate(settings);
+            activateMenuItem(settings);
 
             return;
-
         }
-
-
-        var menuItem =
-            findMenuItem(
-                'settings'
-            );
-
-
-        if (menuItem) {
-
-            activate(menuItem);
-
-            return;
-
-        }
-
 
         try {
 
@@ -741,9 +453,7 @@
                 Lampa.Controller.toggle
             ) {
 
-                Lampa.Controller.toggle(
-                    'menu'
-                );
+                Lampa.Controller.toggle('menu');
 
             }
 
@@ -766,7 +476,6 @@
             return;
         }
 
-
         if (id === 'settings') {
 
             openSettings();
@@ -774,37 +483,25 @@
             return;
         }
 
+        var item =
+            findMenuItem(id);
 
-        var element =
-            findMenuItem(
-                id
-            );
+        if (item) {
 
-
-        if (element) {
-
-            activate(
-                element
-            );
+            activateMenuItem(item);
 
             return;
         }
-
 
         setTimeout(
             function () {
 
                 var retry =
-                    findMenuItem(
-                        id
-                    );
-
+                    findMenuItem(id);
 
                 if (retry) {
 
-                    activate(
-                        retry
-                    );
+                    activateMenuItem(retry);
 
                 }
 
@@ -823,663 +520,167 @@
     function setActive(index) {
 
         if (index < 0) {
-
-            index =
-                ITEMS.length - 1;
-
+            index = ITEMS.length - 1;
         }
 
-
-        if (
-            index >= ITEMS.length
-        ) {
-
+        if (index >= ITEMS.length) {
             index = 0;
-
         }
-
 
         current = index;
 
+        if (!nav) {
+            return;
+        }
+
+        var items =
+            nav.querySelectorAll(
+                '.oritv-prisma-item'
+            );
 
         for (
             var i = 0;
-            i < buttons.length;
+            i < items.length;
             i++
         ) {
 
-            if (
-                i === current
-            ) {
+            if (i === current) {
 
-                buttons[i]
+                items[i]
                     .classList
-                    .add(
-                        'oritv-active'
-                    );
+                    .add('oritv-active');
 
             } else {
 
-                buttons[i]
+                items[i]
                     .classList
-                    .remove(
-                        'oritv-active'
-                    );
+                    .remove('oritv-active');
 
             }
-
         }
     }
 
 
     /*
      * =========================================================
-     * CONTROLLER BRIDGE
+     * CREATE BUTTON
+     *
+     * ЭТО ВАЖНАЯ ЧАСТЬ ИЗ РАБОЧЕГО V4
      * =========================================================
      */
 
-    var navFocused = false;
-
-
-    function focusNav() {
-
-        if (
-            !nav ||
-            !buttons.length
-        ) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            if (
-                Lampa.Controller &&
-                Lampa.Controller.collectionSet
-            ) {
-
-                Lampa.Controller.collectionSet(
-                    nav,
-                    false,
-                    true
-                );
-
-            }
-
-
-            if (
-                Lampa.Controller &&
-                Lampa.Controller.collectionFocus
-            ) {
-
-                Lampa.Controller.collectionFocus(
-                    buttons[current],
-                    nav,
-                    true
-                );
-
-                return true;
-
-            }
-
-        } catch (e) {}
-
-
-        try {
-
-            if (window.jQuery) {
-
-                window.jQuery(
-                    buttons[current]
-                )
-                .trigger(
-                    'hover:focus'
-                );
-
-                return true;
-
-            }
-
-        } catch (e) {}
-
-
-        return false;
-    }
-
-
-    /*
-     * =========================================================
-     * KEYBOARD / REMOTE
-     * =========================================================
-     */
-
-    function handleKey(event) {
-
-        var key =
-            event.key ||
-            event.code ||
-            '';
-
-
-        var code =
-            event.keyCode ||
-            event.which ||
-            0;
-
-
-        var up =
-            key === 'ArrowUp' ||
-            key === 'Up' ||
-            code === 38;
-
-
-        var down =
-            key === 'ArrowDown' ||
-            key === 'Down' ||
-            code === 40;
-
-
-        var left =
-            key === 'ArrowLeft' ||
-            key === 'Left' ||
-            code === 37;
-
-
-        var right =
-            key === 'ArrowRight' ||
-            key === 'Right' ||
-            code === 39;
-
-
-        var ok =
-            key === 'Enter' ||
-            key === 'NumpadEnter' ||
-            key === 'OK' ||
-            code === 13 ||
-            code === 32;
-
-
-        var back =
-            key === 'Escape' ||
-            key === 'Esc' ||
-            key === 'Backspace' ||
-            key === 'GoBack' ||
-            code === 27 ||
-            code === 8;
-
-
-        if (
-            !nav ||
-            !buttons.length
-        ) {
-
-            return;
-
-        }
-
-
-        /*
-         * =====================================================
-         * В ШТОРКЕ НЕ НАХОДИМСЯ
-         * =====================================================
-         */
-
-        if (!navFocused) {
-
-            /*
-             * Только ↑ забираем себе.
-             */
-
-            if (up) {
-
-                navFocused = true;
-
-                focusNav();
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-            }
-
-            return;
-        }
-
-
-        /*
-         * =====================================================
-         * ВЛЕВО / ВПРАВО
-         * =====================================================
-         */
-
-        if (
-            left ||
-            right
-        ) {
-
-            current +=
-                right
-                    ? 1
-                    : -1;
-
-
-            if (
-                current < 0
-            ) {
-
-                current =
-                    buttons.length - 1;
-
-            }
-
-
-            if (
-                current >= buttons.length
-            ) {
-
-                current = 0;
-
-            }
-
-
-            setActive(
-                current
+    function createButton(item) {
+
+        var button =
+            window.jQuery(
+                '<div class="' +
+                'head__action ' +
+                'selector ' +
+                'oritv-prisma-item' +
+                '">' +
+                '</div>'
             );
 
+        button.html(
+            item.icon +
+            '<span class="oritv-prisma-text">' +
+            item.title +
+            '</span>'
+        );
 
-            focusNav();
+        button.attr(
+            'data-oritv-action',
+            item.id
+        );
 
-
-            event.preventDefault();
-
-            event.stopPropagation();
-
-            return;
-        }
+        button.attr(
+            'data-prisma-action',
+            item.id
+        );
 
 
         /*
-         * =====================================================
-         * OK
-         * =====================================================
+         * Lampa Remote / Controller
          */
 
-        if (ok) {
+        button.on(
+            'hover:focus',
+            function () {
 
-            var item =
-                ITEMS[current];
+                var index =
+                    ITEMS.indexOf(item);
+
+                if (index !== -1) {
+                    setActive(index);
+                }
+
+            }
+        );
 
 
-            if (item) {
+        button.on(
+            'hover:enter',
+            function () {
+
+                var index =
+                    ITEMS.indexOf(item);
+
+                if (index !== -1) {
+                    setActive(index);
+                }
 
                 openSection(
                     item.id
                 );
 
             }
-
-
-            event.preventDefault();
-
-            event.stopPropagation();
-
-            return;
-        }
-
-
-        /*
-         * =====================================================
-         * DOWN / BACK
-         * =====================================================
-         */
-
-        if (
-            down ||
-            back
-        ) {
-
-            navFocused =
-                false;
-
-
-            /*
-             * DOWN возвращает
-             * управление контенту Lampa.
-             */
-
-            try {
-
-                if (
-                    down &&
-                    Lampa.Controller &&
-                    Lampa.Controller.toggle
-                ) {
-
-                    Lampa.Controller.toggle(
-                        'content'
-                    );
-
-                }
-
-            } catch (e) {}
-
-
-            event.preventDefault();
-
-            event.stopPropagation();
-
-        }
-
-    }
-
-
-    /*
-     * =========================================================
-     * INSTALL KEYBOARD
-     * =========================================================
-     */
-
-    function installKeyboard() {
-
-        if (
-            window.ORITV_PRISMA_KEYS_V4
-        ) {
-
-            return;
-
-        }
-
-
-        window.ORITV_PRISMA_KEYS_V4 =
-            true;
-
-
-        document.addEventListener(
-            'keydown',
-            handleKey,
-            true
         );
 
-    }
 
+        /*
+         * Мышь
+         */
 
-    /*
-     * =========================================================
-     * CREATE NAV
-     * =========================================================
-     */
+        button.on(
+            'mouseenter',
+            function () {
 
-    function createNav() {
+                var index =
+                    ITEMS.indexOf(item);
 
-        if (nav) {
-
-            if (
-                document.body.contains(
-                    nav
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            nav = null;
-
-        }
-
-
-        nav =
-            document.createElement(
-                'div'
-            );
-
-
-        nav.className =
-            'oritv-prisma-nav';
-
-
-        buttons = [];
-
-
-        for (
-            var i = 0;
-            i < ITEMS.length;
-            i++
-        ) {
-
-            (function (index) {
-
-                var data =
-                    ITEMS[index];
-
-
-                var button =
-                    document.createElement(
-                        'div'
-                    );
-
-
-                /*
-                 * ВАЖНО:
-                 * head__action + selector
-                 *
-                 * Это позволяет штатному
-                 * Controller Lampa видеть
-                 * нашу кнопку как элемент Head.
-                 */
-
-                button.className =
-                    'head__action selector oritv-prisma-item';
-
-
-                button.setAttribute(
-                    'data-oritv-action',
-                    data.id
-                );
-
-
-                button.setAttribute(
-                    'data-prisma-action',
-                    data.id
-                );
-
-
-                button.innerHTML =
-                    data.icon +
-                    '<span class="oritv-prisma-text">' +
-                    data.title +
-                    '</span>';
-
-
-                /*
-                 * =================================================
-                 * MOUSE
-                 * =================================================
-                 */
-
-                button.addEventListener(
-                    'mouseenter',
-                    function () {
-
-                        setActive(
-                            index
-                        );
-
-                    }
-                );
-
-
-                button.addEventListener(
-                    'click',
-                    function (event) {
-
-                        event.preventDefault();
-
-                        event.stopPropagation();
-
-
-                        setActive(
-                            index
-                        );
-
-
-                        openSection(
-                            data.id
-                        );
-
-                    }
-                );
-
-
-                /*
-                 * =================================================
-                 * LAMPA HOVER EVENTS
-                 * =================================================
-                 */
-
-                if (window.jQuery) {
-
-                    try {
-
-                        window.jQuery(
-                            button
-                        )
-                        .on(
-                            'hover:focus',
-                            function () {
-
-                                navFocused =
-                                    true;
-
-                                setActive(
-                                    index
-                                );
-
-                            }
-                        );
-
-
-                        window.jQuery(
-                            button
-                        )
-                        .on(
-                            'hover:enter',
-                            function () {
-
-                                navFocused =
-                                    true;
-
-                                setActive(
-                                    index
-                                );
-
-
-                                openSection(
-                                    data.id
-                                );
-
-                            }
-                        );
-
-                    } catch (e) {}
-
+                if (index !== -1) {
+                    setActive(index);
                 }
 
-
-                buttons.push(
-                    button
-                );
-
-
-                nav.appendChild(
-                    button
-                );
-
-
-            })(i);
-
-        }
-
-
-        /*
-         * =========================================================
-         * ГЛАВНОЕ ИЗМЕНЕНИЕ:
-         * ВСТАВЛЯЕМ ШТОРКУ В HEAD LAMPA
-         * =========================================================
-         */
-
-        var actions =
-            null;
-
-
-        try {
-
-            if (
-                Lampa.Head &&
-                Lampa.Head.render
-            ) {
-
-                actions =
-                    Lampa.Head
-                        .render()
-                        .querySelector(
-                            '.head__actions'
-                        );
-
             }
-
-        } catch (e) {}
-
-
-        if (!actions) {
-
-            try {
-
-                actions =
-                    document.querySelector(
-                        '.head__actions'
-                    );
-
-            } catch (e) {}
-
-        }
-
-
-        if (actions) {
-
-            /*
-             * Теперь Controller Lampa
-             * видит selector-кнопки.
-             */
-
-            actions.appendChild(
-                nav
-            );
-
-        } else {
-
-            /*
-             * Резервный вариант.
-             */
-
-            document.body.appendChild(
-                nav
-            );
-
-        }
-
-
-        /*
-         * По умолчанию Фильмы.
-         */
-
-        setActive(
-            1
         );
 
+
+        button.on(
+            'click',
+            function (event) {
+
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                var index =
+                    ITEMS.indexOf(item);
+
+                if (index !== -1) {
+                    setActive(index);
+                }
+
+                openSection(
+                    item.id
+                );
+
+            }
+        );
+
+
+        return button;
     }
 
 
@@ -1491,47 +692,57 @@
 
     function cleanHead() {
 
-        var actions =
-            null;
+        var head =
+            document.querySelector(
+                '.head'
+            );
 
+        if (!head) {
+            return;
+        }
 
-        try {
+        var body =
+            head.querySelector(
+                '.head__body'
+            );
 
-            if (
-                Lampa.Head &&
-                Lampa.Head.render
-            ) {
-
-                actions =
-                    Lampa.Head
-                        .render()
-                        .querySelector(
-                            '.head__actions'
-                        );
-
-            }
-
-        } catch (e) {}
-
-
-        if (!actions) {
-
-            try {
-
-                actions =
-                    document.querySelector(
-                        '.head__actions'
-                    );
-
-            } catch (e) {}
-
+        if (!body) {
+            return;
         }
 
 
+        var time =
+            body.querySelectorAll(
+                '.head__time, .head__markers, .head__fps, .head__status'
+            );
+
+        for (
+            var i = 0;
+            i < time.length;
+            i++
+        ) {
+
+            time[i].style.setProperty(
+                'display',
+                'none',
+                'important'
+            );
+
+            time[i].style.setProperty(
+                'visibility',
+                'hidden',
+                'important'
+            );
+        }
+
+
+        var actions =
+            body.querySelector(
+                '.head__actions'
+            );
+
         if (!actions) {
-
             return;
-
         }
 
 
@@ -1542,36 +753,35 @@
 
 
         for (
-            var i = 0;
-            i < children.length;
-            i++
+            var j = 0;
+            j < children.length;
+            j++
         ) {
 
             var child =
-                children[i];
+                children[j];
 
 
             /*
-             * НАШУ ШТОРКУ НЕ ТРОГАЕМ
+             * Наша шторка
              */
 
             if (
-                child === nav ||
+                child.classList &&
                 child.classList.contains(
                     'oritv-prisma-nav'
                 )
             ) {
 
                 continue;
-
             }
 
 
             /*
-             * ПОИСК ОСТАВЛЯЕМ
+             * Поиск оставляем
              */
 
-            var classes =
+            var cls =
                 typeof child.className ===
                 'string'
                     ? child.className
@@ -1579,7 +789,7 @@
 
 
             if (
-                classes.indexOf(
+                cls.indexOf(
                     'open--search'
                 ) !== -1
             ) {
@@ -1590,25 +800,22 @@
                     'important'
                 );
 
-
                 child.style.setProperty(
                     'visibility',
                     'visible',
                     'important'
                 );
 
-
                 continue;
-
             }
 
 
             /*
-             * НАСТРОЙКИ LAMPA СКРЫВАЕМ
+             * Настройки Lampa скрываем
              */
 
             if (
-                classes.indexOf(
+                cls.indexOf(
                     'open--settings'
                 ) !== -1
             ) {
@@ -1619,63 +826,150 @@
                     'important'
                 );
 
-
                 child.style.setProperty(
                     'visibility',
                     'hidden',
                     'important'
                 );
 
-
                 continue;
-
             }
 
 
             /*
-             * ОСТАЛЬНЫЕ ИКОНКИ
-             * УБИРАЕМ
+             * Остальные штатные кнопки убираем
              */
 
             try {
-
                 child.remove();
-
             } catch (e) {
 
-                try {
-
-                    child.style.setProperty(
-                        'display',
-                        'none',
-                        'important'
-                    );
-
-                } catch (ee) {}
-
+                child.style.setProperty(
+                    'display',
+                    'none',
+                    'important'
+                );
             }
-
         }
-
     }
 
 
     /*
      * =========================================================
      * INSTALL
+     *
+     * ТОЧНО ПО ПРИНЦИПУ РАБОЧЕГО PRISMA V4
      * =========================================================
      */
 
     function install() {
 
-        addStyle();
+        var head =
+            document.querySelector(
+                '.head'
+            );
 
-        createNav();
+        if (!head) {
+            return false;
+        }
+
+        var actions =
+            head.querySelector(
+                '.head__actions'
+            );
+
+        if (!actions) {
+            return false;
+        }
+
+
+        addStyle();
 
         cleanHead();
 
-        installKeyboard();
 
+        /*
+         * Если уже создано —
+         * ничего не пересоздаём.
+         */
+
+        var old =
+            actions.querySelector(
+                '.oritv-prisma-nav'
+            );
+
+        if (old) {
+
+            nav = old;
+
+            setActive(current);
+
+            installed = true;
+
+            return true;
+        }
+
+
+        /*
+         * Создаём контейнер.
+         */
+
+        nav =
+            document.createElement(
+                'div'
+            );
+
+        nav.className =
+            'oritv-prisma-nav';
+
+
+        /*
+         * Создаём кнопки.
+         */
+
+        for (
+            var i = 0;
+            i < ITEMS.length;
+            i++
+        ) {
+
+            var button =
+                createButton(
+                    ITEMS[i]
+                );
+
+            nav.appendChild(
+                button[0]
+            );
+        }
+
+
+        /*
+         * ВАЖНО:
+         * вставляем именно в .head__actions
+         */
+
+        try {
+
+            actions.appendChild(
+                nav
+            );
+
+        } catch (e) {
+
+            nav = null;
+
+            return false;
+        }
+
+
+        setActive(1);
+
+        cleanHead();
+
+        installed = true;
+
+        return true;
     }
 
 
@@ -1691,31 +985,34 @@
             typeof MutationObserver ===
             'undefined'
         ) {
-
             return;
-
         }
-
 
         var observer =
             new MutationObserver(
                 function () {
 
-                    /*
-                     * Lampa может пересоздать Head.
-                     */
+                    var currentNav =
+                        document.querySelector(
+                            '.oritv-prisma-nav'
+                        );
 
                     if (
-                        !nav ||
-                        !document.body.contains(
-                            nav
-                        )
+                        !currentNav
                     ) {
 
-                        createNav();
+                        installed = false;
+
+                        nav = null;
+
+                        install();
+
+                    } else {
+
+                        nav =
+                            currentNav;
 
                     }
-
 
                     cleanHead();
 
@@ -1734,7 +1031,6 @@
             );
 
         }
-
     }
 
 
@@ -1746,22 +1042,41 @@
 
     function start() {
 
-        if (!document.body) {
-
-            setTimeout(
-                start,
-                200
-            );
-
-            return;
-
-        }
-
-
-        install();
+        addStyle();
 
         startObserver();
 
+
+        var attempts = 0;
+
+        var timer =
+            setInterval(
+                function () {
+
+                    attempts++;
+
+                    if (install()) {
+
+                        clearInterval(
+                            timer
+                        );
+
+                        return;
+                    }
+
+                    if (
+                        attempts >= 150
+                    ) {
+
+                        clearInterval(
+                            timer
+                        );
+
+                    }
+
+                },
+                200
+            );
     }
 
 
