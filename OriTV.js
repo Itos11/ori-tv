@@ -1,266 +1,288 @@
 (function () {
     'use strict';
 
-    if (window.ORITV_LOADED) return;
-    window.ORITV_LOADED = true;
+    /*
+     * ORITV
+     * Prisma-like navigation for Lampa
+     */
 
     var ITEMS = [
-        { title: 'ГЛАВНАЯ', action: 'main' },
-        { title: 'ИСТОРИЯ', action: 'history' },
-        { title: 'ФИЛЬМЫ', action: 'movie' },
-        { title: 'СЕРИАЛЫ', action: 'tv' },
-        { title: 'МУЛЬТФИЛЬМЫ', action: 'cartoon' }
+        {
+            title: 'ГЛАВНАЯ',
+            action: 'main'
+        },
+        {
+            title: 'ИСТОРИЯ',
+            action: 'history'
+        },
+        {
+            title: 'ФИЛЬМЫ',
+            action: 'movie'
+        },
+        {
+            title: 'СЕРИАЛЫ',
+            action: 'tv'
+        },
+        {
+            title: 'МУЛЬТФИЛЬМЫ',
+            action: 'cartoon'
+        }
     ];
-
-    var installed = false;
 
 
     /* =====================================================
        CSS
        ===================================================== */
 
-    function addStyle() {
+    function installCSS() {
 
-        if (document.getElementById('oritv-style')) {
+        if (document.getElementById('oritv-css')) {
             return;
         }
 
         var style = document.createElement('style');
 
-        style.id = 'oritv-style';
+        style.id = 'oritv-css';
 
         style.textContent = `
 
-            /* ===============================================
-               ПРЯЧЕМ ВСЁ ЛИШНЕЕ В ШАПКЕ LAMPA
-               =============================================== */
+        /* =================================================
+           LAMPA HEAD
+           ================================================= */
 
-            .head .head__time {
-                display: none !important;
-            }
+        .head__time {
+            display: none !important;
+        }
 
-            .head .head__markers {
-                display: none !important;
-            }
-
-
-            /* ===============================================
-               ШТАТНЫЕ КНОПКИ, КОТОРЫЕ НАМ НЕ НУЖНЫ
-               =============================================== */
-
-            .head .head__actions .open--profile,
-            .head .head__actions .open--notice,
-            .head .head__actions .open--broadcast,
-            .head .head__actions .open--feed,
-            .head .head__actions .open--premium,
-            .head .head__actions .full--screen {
-
-                display: none !important;
-
-                visibility: hidden !important;
-
-                opacity: 0 !important;
-
-                pointer-events: none !important;
-            }
+        .head__markers {
+            display: none !important;
+        }
 
 
-            /* ===============================================
-               НАША НАВИГАЦИЯ
-               =============================================== */
+        /* =================================================
+           ШТАТНЫЕ КНОПКИ LAMPA
+
+           0 search       оставить
+           1 broadcast    убрать
+           2 notice       убрать
+           3 settings     оставить
+           4 profile      убрать
+           5 fullscreen   убрать
+           ================================================= */
+
+        .head__actions .open--broadcast,
+        .head__actions .open--notice,
+        .head__actions .open--profile,
+        .head__actions .full--screen {
+
+            display: none !important;
+
+            visibility: hidden !important;
+
+            opacity: 0 !important;
+
+            pointer-events: none !important;
+        }
+
+
+        /* =================================================
+           НАША НАВИГАЦИЯ
+
+           ВАЖНО:
+           Она НЕ находится внутри head__actions.
+           Поэтому Lampa не считает её своей шторкой.
+           ================================================= */
+
+        .oritv-nav {
+
+            position: absolute !important;
+
+            left: 50% !important;
+
+            top: 50% !important;
+
+            transform: translate(-50%, -50%) !important;
+
+            display: flex !important;
+
+            flex-direction: row !important;
+
+            align-items: center !important;
+
+            justify-content: center !important;
+
+            flex-wrap: nowrap !important;
+
+            gap: 5px !important;
+
+            width: max-content !important;
+
+            height: 48px !important;
+
+            padding: 0 !important;
+
+            margin: 0 !important;
+
+            z-index: 1000 !important;
+
+            white-space: nowrap !important;
+
+            pointer-events: auto !important;
+        }
+
+
+        /* =================================================
+           КНОПКИ
+           ================================================= */
+
+        .oritv-nav-item {
+
+            position: relative !important;
+
+            display: flex !important;
+
+            align-items: center !important;
+
+            justify-content: center !important;
+
+            flex: 0 0 auto !important;
+
+            width: auto !important;
+
+            min-width: 0 !important;
+
+            height: 42px !important;
+
+            padding: 0 13px !important;
+
+            margin: 0 !important;
+
+            border-radius: 9px !important;
+
+            box-sizing: border-box !important;
+
+            background: transparent !important;
+
+            color: rgba(255,255,255,.82) !important;
+
+            font-family: Arial, sans-serif !important;
+
+            font-size: 15px !important;
+
+            font-weight: 600 !important;
+
+            line-height: 42px !important;
+
+            white-space: nowrap !important;
+
+            opacity: 1 !important;
+
+            cursor: pointer !important;
+
+            transition:
+                background .12s ease,
+                transform .12s ease !important;
+        }
+
+
+        /* =================================================
+           ФОКУС ПУЛЬТА
+           ================================================= */
+
+        .oritv-nav-item.focus {
+
+            background: rgba(255,255,255,.20) !important;
+
+            color: #ffffff !important;
+
+            transform: scale(1.04) !important;
+        }
+
+
+        /* =================================================
+           SEARCH
+           ================================================= */
+
+        .head__actions .open--search {
+
+            display: flex !important;
+
+            visibility: visible !important;
+
+            opacity: 1 !important;
+
+            pointer-events: auto !important;
+        }
+
+
+        /* =================================================
+           SETTINGS
+           ================================================= */
+
+        .head__actions .open--settings {
+
+            display: flex !important;
+
+            visibility: visible !important;
+
+            opacity: 1 !important;
+
+            pointer-events: auto !important;
+        }
+
+
+        /* =================================================
+           HEAD BODY
+           ================================================= */
+
+        .head__body {
+
+            position: relative !important;
+        }
+
+
+        /* =================================================
+           TV 1920+
+           ================================================= */
+
+        @media (min-width: 1600px) {
 
             .oritv-nav {
 
-                position: absolute !important;
-
-                left: 50% !important;
-
-                top: 50% !important;
-
-                transform: translate(-50%, -50%) !important;
-
-                display: flex !important;
-
-                align-items: center !important;
-
-                justify-content: center !important;
-
-                flex-direction: row !important;
-
-                flex-wrap: nowrap !important;
-
-                gap: 4px !important;
-
-                width: max-content !important;
-
-                height: 48px !important;
-
-                padding: 0 !important;
-
-                margin: 0 !important;
-
-                white-space: nowrap !important;
-
-                z-index: 999999 !important;
-
-                pointer-events: auto !important;
+                gap: 7px !important;
             }
-
-
-            /* ===============================================
-               КНОПКА
-               =============================================== */
 
             .oritv-nav-item {
 
-                position: relative !important;
+                padding-left: 16px !important;
 
-                display: flex !important;
+                padding-right: 16px !important;
 
-                align-items: center !important;
+                font-size: 17px !important;
+            }
+        }
 
-                justify-content: center !important;
 
-                flex: 0 0 auto !important;
+        /* =================================================
+           МАЛЕНЬКИЙ ЭКРАН
+           ================================================= */
 
-                width: auto !important;
+        @media (max-width: 1200px) {
 
-                min-width: 0 !important;
+            .oritv-nav {
 
-                height: 42px !important;
-
-                padding: 0 13px !important;
-
-                margin: 0 !important;
-
-                border-radius: 9px !important;
-
-                box-sizing: border-box !important;
-
-                color: rgba(255,255,255,.82) !important;
-
-                background: transparent !important;
-
-                font-family: Arial, sans-serif !important;
-
-                font-size: 15px !important;
-
-                font-weight: 600 !important;
-
-                line-height: 42px !important;
-
-                white-space: nowrap !important;
-
-                opacity: 1 !important;
+                gap: 2px !important;
             }
 
+            .oritv-nav-item {
 
-            /* ===============================================
-               ФОКУС
-               =============================================== */
+                padding-left: 8px !important;
 
-            .oritv-nav-item.focus {
+                padding-right: 8px !important;
 
-                color: #fff !important;
-
-                background: rgba(255,255,255,.20) !important;
-
-                transform: scale(1.04) !important;
-
-                opacity: 1 !important;
+                font-size: 13px !important;
             }
-
-
-            /* ===============================================
-               ПОИСК
-               =============================================== */
-
-            .head .head__actions .open--search {
-
-                display: flex !important;
-
-                visibility: visible !important;
-
-                opacity: 1 !important;
-
-                pointer-events: auto !important;
-            }
-
-
-            /* ===============================================
-               НАСТРОЙКИ
-               =============================================== */
-
-            .head .head__actions .open--settings {
-
-                display: flex !important;
-
-                visibility: visible !important;
-
-                opacity: 1 !important;
-
-                pointer-events: auto !important;
-            }
-
-
-            /* ===============================================
-               НЕ ПОЗВОЛЯЕМ LAMPA РАСТЯГИВАТЬ НАШ HEAD
-               =============================================== */
-
-            .head .head__actions {
-
-                position: relative !important;
-
-                display: flex !important;
-
-                align-items: center !important;
-
-                flex-direction: row !important;
-            }
-
-
-            /* ===============================================
-               БОЛЬШОЙ ЭКРАН
-               =============================================== */
-
-            @media (min-width: 1600px) {
-
-                .oritv-nav {
-
-                    gap: 6px !important;
-                }
-
-                .oritv-nav-item {
-
-                    padding-left: 16px !important;
-
-                    padding-right: 16px !important;
-
-                    font-size: 17px !important;
-                }
-            }
-
-
-            /* ===============================================
-               МАЛЕНЬКИЙ ЭКРАН
-               =============================================== */
-
-            @media (max-width: 1200px) {
-
-                .oritv-nav {
-
-                    gap: 1px !important;
-                }
-
-                .oritv-nav-item {
-
-                    padding-left: 8px !important;
-
-                    padding-right: 8px !important;
-
-                    font-size: 13px !important;
-                }
-            }
+        }
 
         `;
 
@@ -269,10 +291,10 @@
 
 
     /* =====================================================
-       УДАЛЯЕМ СТАРУЮ ORITV НАВИГАЦИЮ
+       УБИРАЕМ СТАРЫЕ ORITV ШТОРКИ
        ===================================================== */
 
-    function removeOld() {
+    function removeOldNavigation() {
 
         var old =
             document.querySelectorAll(
@@ -282,17 +304,106 @@
         for (var i = 0; i < old.length; i++) {
 
             try {
-                old[i].remove();
+
+                old[i].parentNode.removeChild(
+                    old[i]
+                );
+
             } catch (e) {}
         }
     }
 
 
     /* =====================================================
-       ИЩЕМ ШТАТНЫЙ ПУНКТ LAMPA
+       СКРЫВАЕМ ШТАТНЫЕ ЭЛЕМЕНТЫ
        ===================================================== */
 
-    function findLampaItem(action) {
+    function cleanLampaHead() {
+
+        var selectors = [
+
+            '.head__actions .open--broadcast',
+
+            '.head__actions .open--notice',
+
+            '.head__actions .open--profile',
+
+            '.head__actions .full--screen'
+
+        ];
+
+
+        for (
+            var i = 0;
+            i < selectors.length;
+            i++
+        ) {
+
+            var elements =
+                document.querySelectorAll(
+                    selectors[i]
+                );
+
+
+            for (
+                var j = 0;
+                j < elements.length;
+                j++
+            ) {
+
+                elements[j].style.display =
+                    'none';
+
+                elements[j].style.visibility =
+                    'hidden';
+
+                elements[j].style.opacity =
+                    '0';
+
+                elements[j].style.pointerEvents =
+                    'none';
+            }
+        }
+
+
+        var time =
+            document.querySelectorAll(
+                '.head__time'
+            );
+
+        for (
+            var t = 0;
+            t < time.length;
+            t++
+        ) {
+
+            time[t].style.display =
+                'none';
+        }
+
+
+        var markers =
+            document.querySelectorAll(
+                '.head__markers'
+            );
+
+        for (
+            var m = 0;
+            m < markers.length;
+            m++
+        ) {
+
+            markers[m].style.display =
+                'none';
+        }
+    }
+
+
+    /* =====================================================
+       ПОИСК ПУНКТА LAMPA
+       ===================================================== */
+
+    function findMenuItem(action) {
 
         try {
 
@@ -310,21 +421,51 @@
 
 
     /* =====================================================
-       ЗАПУСК LAMPA
+       ЗАПУСК ПУНКТА
        ===================================================== */
 
-    function activate(item) {
+    function activateMenuItem(action) {
+
+        var item =
+            findMenuItem(action);
+
 
         if (!item) {
+
+            setTimeout(
+                function () {
+
+                    var retry =
+                        findMenuItem(
+                            action
+                        );
+
+                    if (retry) {
+
+                        triggerItem(
+                            retry
+                        );
+                    }
+
+                },
+                250
+            );
+
             return;
         }
+
+
+        triggerItem(item);
+    }
+
+
+    function triggerItem(item) {
 
         try {
 
             if (
                 window.jQuery &&
-                window.jQuery.fn &&
-                window.jQuery.fn.trigger
+                window.jQuery.fn
             ) {
 
                 window.jQuery(item)
@@ -356,88 +497,81 @@
        ИСТОРИЯ
        ===================================================== */
 
-    function history() {
+    function openHistory() {
 
-        setTimeout(function () {
+        try {
 
-            try {
+            Lampa.Router.call(
+                'favorite',
+                {
+                    url: '',
+                    title: 'История просмотров',
+                    component: 'favorite',
+                    type: 'history',
+                    page: 1,
+                    filter: ''
+                }
+            );
 
-                Lampa.Router.call(
-                    'favorite',
-                    {
-                        url: '',
-                        title: 'История просмотров',
-                        component: 'favorite',
-                        type: 'history',
-                        page: 1,
-                        filter: ''
-                    }
-                );
+        } catch (e) {
 
-            } catch (e) {}
-
-        }, 200);
+            console.log(
+                'OriTV history error',
+                e
+            );
+        }
     }
 
 
     /* =====================================================
-       ДЕЙСТВИЕ
+       ACTION
        ===================================================== */
 
-    function action(type) {
+    function runAction(action) {
 
-        if (type === 'history') {
+        if (action === 'history') {
 
-            history();
-
-            return;
-        }
-
-        var item =
-            findLampaItem(type);
-
-        if (item) {
-
-            activate(item);
+            openHistory();
 
             return;
         }
 
-        setTimeout(function () {
 
-            var retry =
-                findLampaItem(type);
-
-            if (retry) {
-                activate(retry);
-            }
-
-        }, 300);
+        activateMenuItem(
+            action
+        );
     }
 
 
     /* =====================================================
-       КНОПКА
+       СОЗДАНИЕ КНОПКИ
        ===================================================== */
 
-    function makeButton(data) {
+    function createButton(item) {
 
         var button =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         button.className =
-            'head__action selector oritv-nav-item';
+            'oritv-nav-item selector';
+
 
         button.textContent =
-            data.title;
+            item.title;
+
 
         button.setAttribute(
             'data-oritv-action',
-            data.action
+            item.action
         );
 
 
-        /* OK пульта */
+        /* =================================================
+           OK ПУЛЬТА
+           ================================================= */
 
         if (window.jQuery) {
 
@@ -445,24 +579,29 @@
                 'hover:enter',
                 function () {
 
-                    action(
-                        data.action
+                    runAction(
+                        item.action
                     );
 
                 }
             );
-
         }
 
 
-        /* Мышь */
+        /* =================================================
+           МЫШЬ
+           ================================================= */
 
         button.addEventListener(
             'click',
-            function () {
+            function (event) {
 
-                action(
-                    data.action
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                runAction(
+                    item.action
                 );
 
             }
@@ -474,20 +613,10 @@
 
 
     /* =====================================================
-       УСТАНОВКА
+       СОЗДАНИЕ НАВИГАЦИИ
        ===================================================== */
 
-    function install() {
-
-        if (
-            !window.Lampa ||
-            !Lampa.Head ||
-            !Lampa.Head.render
-        ) {
-
-            return false;
-        }
-
+    function createNavigation() {
 
         var head;
 
@@ -511,44 +640,37 @@
         }
 
 
-        var actions;
-
-        try {
-
-            actions =
-                head.find(
-                    '.head__actions'
-                );
-
-        } catch (e) {
-
-            return false;
-        }
+        var body =
+            head.find(
+                '.head__body'
+            );
 
 
         if (
-            !actions ||
-            !actions.length
+            !body ||
+            !body.length
         ) {
 
             return false;
         }
 
 
-        addStyle();
+        /*
+         * На всякий случай удаляем старую.
+         */
+
+        removeOldNavigation();
 
 
-        removeOld();
-
-
-        /* ===============================================
-           СОЗДАЁМ ТОЛЬКО ОДНУ ШТОРКУ
-           =============================================== */
+        /*
+         * Создаём ЕДИНСТВЕННУЮ навигацию.
+         */
 
         var nav =
             document.createElement(
                 'div'
             );
+
 
         nav.className =
             'oritv-nav';
@@ -561,38 +683,71 @@
         ) {
 
             nav.appendChild(
-                makeButton(
+                createButton(
                     ITEMS[i]
                 )
             );
-
         }
 
 
-        actions[0].appendChild(
+        /*
+         * КЛЮЧЕВОЕ ОТЛИЧИЕ:
+         *
+         * добавляем в head__body,
+         * а НЕ в head__actions.
+         */
+
+        body[0].appendChild(
             nav
         );
 
-
-        installed = true;
 
         return true;
     }
 
 
     /* =====================================================
-       СТАРТ
+       START
        ===================================================== */
 
-    var tries = 0;
+    function start() {
+
+        installCSS();
+
+        cleanLampaHead();
+
+
+        if (
+            document.querySelector(
+                '.oritv-nav'
+            )
+        ) {
+
+            return true;
+        }
+
+
+        return createNavigation();
+    }
+
+
+    /* =====================================================
+       ЖДЁМ LAMPA
+       ===================================================== */
+
+    var attempts = 0;
 
     var timer =
         setInterval(
             function () {
 
-                tries++;
+                attempts++;
 
-                if (install()) {
+
+                cleanLampaHead();
+
+
+                if (start()) {
 
                     clearInterval(
                         timer
@@ -601,7 +756,8 @@
                     return;
                 }
 
-                if (tries > 150) {
+
+                if (attempts > 150) {
 
                     clearInterval(
                         timer
@@ -614,9 +770,30 @@
 
 
     /* =====================================================
-       ДОПОЛНИТЕЛЬНО:
-       ЕСЛИ LAMPA ДОБАВИЛА АККАУНТ/УВЕДОМЛЕНИЕ ПОЗЖЕ,
-       CSS ВСЁ РАВНО ИХ СПРЯЧЕТ.
+       ЕСЛИ LAMPA ПОТОМ ПЕРЕСОЗДАСТ HEAD
        ===================================================== */
+
+    var observer =
+        new MutationObserver(
+            function () {
+
+                cleanLampaHead();
+
+            }
+        );
+
+
+    try {
+
+        observer.observe(
+            document.body,
+            {
+                childList: true,
+                subtree: true
+            }
+        );
+
+    } catch (e) {}
+
 
 })();
