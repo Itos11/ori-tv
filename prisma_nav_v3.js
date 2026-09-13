@@ -1,30 +1,15 @@
 (function () {
     'use strict';
 
-    if (window.PRISMA_NAV_V3_FINAL) return;
-    window.PRISMA_NAV_V3_FINAL = true;
+    if (window.PRISMA_NAV_V3_ONLY) return;
+    window.PRISMA_NAV_V3_ONLY = true;
 
     var ITEMS = [
-        {
-            title: 'ГЛАВНОЕ',
-            action: 'main'
-        },
-        {
-            title: 'ИСТОРИЯ',
-            action: 'history'
-        },
-        {
-            title: 'ФИЛЬМЫ',
-            action: 'movie'
-        },
-        {
-            title: 'СЕРИАЛЫ',
-            action: 'tv'
-        },
-        {
-            title: 'МУЛЬТФИЛЬМЫ',
-            action: 'cartoon'
-        }
+        { title: 'ГЛАВНОЕ', action: 'main' },
+        { title: 'ИСТОРИЯ', action: 'history' },
+        { title: 'ФИЛЬМЫ', action: 'movie' },
+        { title: 'СЕРИАЛЫ', action: 'tv' },
+        { title: 'МУЛЬТФИЛЬМЫ', action: 'cartoon' }
     ];
 
     var installed = false;
@@ -36,25 +21,71 @@
 
     function installStyle() {
 
-        if (document.getElementById('prisma-nav-v3-final-style')) {
+        if (document.getElementById('prisma-only-style')) {
             return;
         }
 
         var style = document.createElement('style');
 
-        style.id = 'prisma-nav-v3-final-style';
+        style.id = 'prisma-only-style';
 
         style.textContent = `
 
             /*
-             * Контейнер нашей навигации.
-             *
-             * Слева оставляем место для названия Lampa.
-             * Справа оставляем место для:
-             * поиск / уведомления / настройки / профиль.
+             * =================================================
+             * УБИРАЕМ НЕНУЖНЫЕ ЭЛЕМЕНТЫ LAMPA
+             * =================================================
              */
 
-            .prisma-nav-v3-container {
+            /*
+             * Оставляем первые и третью штатные иконки:
+             *
+             * 1 = ПОИСК
+             * 2 = УВЕДОМЛЕНИЯ
+             * 3 = НАСТРОЙКИ
+             * 4 = ПРОФИЛЬ
+             * 5 = ПОЛНЫЙ ЭКРАН
+             */
+
+            .head__actions > .head__action:nth-child(2),
+            .head__actions > .head__action:nth-child(4),
+            .head__actions > .head__action:nth-child(5),
+            .head__actions > .full--screen {
+
+                display: none !important;
+            }
+
+
+            /*
+             * Часы
+             */
+
+            .head__time {
+
+                display: none !important;
+            }
+
+
+            /*
+             * Возможные дополнительные индикаторы
+             */
+
+            .head__actions .head__clock,
+            .head__actions .head__time,
+            .head__actions .head__status,
+            .head__actions .head__more {
+
+                display: none !important;
+            }
+
+
+            /*
+             * =================================================
+             * НАША НАВИГАЦИЯ
+             * =================================================
+             */
+
+            .prisma-only-container {
 
                 display: flex !important;
 
@@ -97,10 +128,12 @@
 
 
             /*
-             * Пункты меню
+             * =================================================
+             * КНОПКИ
+             * =================================================
              */
 
-            .prisma-nav-v3-item {
+            .prisma-only-item {
 
                 display: flex !important;
 
@@ -124,7 +157,7 @@
 
                 border-radius: 8px !important;
 
-                color: rgba(255,255,255,.82) !important;
+                color: rgba(255,255,255,.85) !important;
 
                 font-family: Arial, sans-serif !important;
 
@@ -136,7 +169,7 @@
 
                 white-space: nowrap !important;
 
-                opacity: .82 !important;
+                opacity: .85 !important;
 
                 background: transparent !important;
 
@@ -152,10 +185,10 @@
 
 
             /*
-             * Выбранный пункт
+             * Фокус
              */
 
-            .prisma-nav-v3-item.focus {
+            .prisma-only-item.focus {
 
                 color: #ffffff !important;
 
@@ -174,7 +207,7 @@
              * Наведение мышью
              */
 
-            .prisma-nav-v3-item:hover {
+            .prisma-only-item:hover {
 
                 color: #ffffff !important;
 
@@ -185,21 +218,40 @@
 
 
             /*
-             * Маленькие экраны
+             * =================================================
+             * ПОИСК И НАСТРОЙКИ
+             * =================================================
+             *
+             * Немного ближе друг к другу.
+             */
+
+            .head__actions > .head__action:nth-child(1),
+            .head__actions > .head__action:nth-child(3) {
+
+                margin-left: 4px !important;
+
+                margin-right: 4px !important;
+            }
+
+
+            /*
+             * =================================================
+             * МАЛЕНЬКИЙ ЭКРАН
+             * =================================================
              */
 
             @media (max-width: 1200px) {
 
-                .prisma-nav-v3-container {
+                .prisma-only-container {
 
                     left: 27% !important;
 
-                    right: 24% !important;
+                    right: 23% !important;
 
                     gap: 1px !important;
                 }
 
-                .prisma-nav-v3-item {
+                .prisma-only-item {
 
                     padding-left: 8px !important;
 
@@ -215,21 +267,23 @@
 
 
             /*
-             * Большой экран / телевизор
+             * =================================================
+             * БОЛЬШОЙ ТВ
+             * =================================================
              */
 
             @media (min-width: 1600px) {
 
-                .prisma-nav-v3-container {
+                .prisma-only-container {
 
                     left: 27% !important;
 
-                    right: 23% !important;
+                    right: 22% !important;
 
                     gap: 5px !important;
                 }
 
-                .prisma-nav-v3-item {
+                .prisma-only-item {
 
                     padding-left: 17px !important;
 
@@ -246,7 +300,7 @@
 
 
     /* =========================================================
-       ПОИСК ШТАТНОГО ПУНКТА LAMPA
+       ПОИСК ШТАТНОГО ПУНКТА
        ========================================================= */
 
     function findMenuItem(action) {
@@ -267,7 +321,7 @@
 
 
     /* =========================================================
-       ЗАПУСК ШТАТНОГО ПУНКТА LAMPA
+       ЗАПУСК ПУНКТА LAMPA
        ========================================================= */
 
     function activateMenuItem(element) {
@@ -284,9 +338,8 @@
                 window.jQuery.fn.trigger
             ) {
 
-                window.jQuery(element).trigger(
-                    'hover:enter'
-                );
+                window.jQuery(element)
+                    .trigger('hover:enter');
 
                 return true;
             }
@@ -360,14 +413,10 @@
 
 
     /* =========================================================
-       ВЫПОЛНЕНИЕ ДЕЙСТВИЯ
+       ДЕЙСТВИЕ
        ========================================================= */
 
     function execute(action) {
-
-        /*
-         * История
-         */
 
         if (action === 'history') {
 
@@ -377,14 +426,9 @@
         }
 
 
-        /*
-         * ГЛАВНОЕ / ФИЛЬМЫ / СЕРИАЛЫ /
-         * МУЛЬТФИЛЬМЫ
-         *
-         * Используем штатные пункты Lampa.
-         */
+        var item =
+            findMenuItem(action);
 
-        var item = findMenuItem(action);
 
         if (item) {
 
@@ -393,11 +437,6 @@
             return;
         }
 
-
-        /*
-         * Если штатное меню ещё не успело
-         * появиться — повторяем попытку.
-         */
 
         setTimeout(
             function () {
@@ -424,7 +463,7 @@
 
         var button = $(
             '<div ' +
-            'class="head__action selector prisma-nav-v3-item">' +
+            'class="head__action selector prisma-only-item">' +
             '</div>'
         );
 
@@ -436,10 +475,6 @@
         );
 
 
-        /*
-         * OK на пульте
-         */
-
         button.on(
             'hover:enter',
             function () {
@@ -449,11 +484,6 @@
             }
         );
 
-
-        /*
-         * Клик мышью
-
-         */
 
         button.on(
             'click',
@@ -480,10 +510,6 @@
         }
 
 
-        /*
-         * Ждём Lampa
-         */
-
         if (
             !window.Lampa ||
             !Lampa.Head ||
@@ -493,10 +519,6 @@
             return false;
         }
 
-
-        /*
-         * Получаем настоящий Head Lampa
-         */
 
         var head;
 
@@ -520,18 +542,12 @@
         }
 
 
-        /*
-         * Получаем область действий
-         */
-
         var actions;
 
         try {
 
             actions =
-                head.find(
-                    '.head__actions'
-                );
+                head.find('.head__actions');
 
         } catch (e) {
 
@@ -548,13 +564,9 @@
         }
 
 
-        /*
-         * Не создаём повторно
-         */
-
         if (
             document.querySelector(
-                '.prisma-nav-v3-container'
+                '.prisma-only-container'
             )
         ) {
 
@@ -568,18 +580,22 @@
 
 
         /*
-         * Создаём контейнер
+         * =====================================================
+         * НАШ КОНТЕЙНЕР
+         * =====================================================
          */
 
         var container =
             document.createElement('div');
 
         container.className =
-            'prisma-nav-v3-container';
+            'prisma-only-container';
 
 
         /*
-         * Создаём пять кнопок
+         * =====================================================
+         * ПЯТЬ ПУНКТОВ
+         * =====================================================
          */
 
         for (
@@ -604,7 +620,9 @@
 
 
         /*
-         * Вставляем в настоящий Head Lampa
+         * =====================================================
+         * ВСТАВКА В HEAD
+         * =====================================================
          */
 
         try {
@@ -626,7 +644,7 @@
 
 
     /* =========================================================
-       ОЖИДАНИЕ ГОТОВНОСТИ LAMPA
+       ЖДЁМ LAMPA
        ========================================================= */
 
     var attempts = 0;
@@ -644,10 +662,6 @@
                     return;
                 }
 
-
-                /*
-                 * 30 секунд максимум
-                 */
 
                 if (attempts >= 150) {
 
